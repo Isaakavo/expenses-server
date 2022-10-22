@@ -14,10 +14,11 @@ services:
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
     ports:
       - "8081:8080"
+    command: java -Djava.security.egd=file:/dev/./urandom -jar /project/target/expensesapp-server-0.0.1-SNAPSHOT.jar
 
   db:
     image: 'postgres:13.1-alpine'
-    container_name: expenses_app_postgres_db
+    container_name: expeses_app_postgres_db
     environment:
       - POSTGRES_USER=compose-postgres
       - POSTGRES_PASSWORD=compose-postgres
