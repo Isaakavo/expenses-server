@@ -13,12 +13,10 @@ import org.springframework.stereotype.Repository
 class UdiRepository {
     val crudTable = RetirementEntity
 
-    fun insert(retirementRecord: RetirementRecord) {
-        //DatabaseConnectionSettings.db
-        var result: EntityID<Long>? = null
-        transaction {
+    fun insert(retirementRecord: RetirementRecord): EntityID<Long> {
+        val result = transaction {
             addLogger(StdOutSqlLogger)
-            result = crudTable
+            crudTable
                 .insertAndGetId {
                     it[userId] = retirementRecord.userId
                     it[purchaseTotal] = retirementRecord.purchaseTotal
@@ -27,6 +25,7 @@ class UdiRepository {
                 }
         }
         println("Data inserted")
+        return result
     }
 
     fun findAll(id: Long): List<RetirementRecord> = crudTable.select{ RetirementEntity.userId eq id }.map { it.toRetirementRecord() }
