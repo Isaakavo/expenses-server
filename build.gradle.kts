@@ -26,9 +26,9 @@ dependencies {
 
     // SQL ORM
     runtimeOnly("org.postgresql:postgresql")
-    implementation("org.jetbrains.exposed:exposed-core:0.24.1")
-    implementation("org.jetbrains.exposed:exposed-dao:0.24.1")
-    implementation("org.jetbrains.exposed:exposed-jdbc:0.24.1")
+    implementation("org.jetbrains.exposed:exposed-core:0.40.1")
+    implementation("org.jetbrains.exposed:exposed-dao:0.40.1")
+    implementation("org.jetbrains.exposed:exposed-jdbc:0.40.1")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")
 }
