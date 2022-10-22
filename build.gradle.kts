@@ -20,15 +20,18 @@ dependencies {
     //implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     //implementation("com.amazonaws:aws-java-sdk:1.12.322")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 
     // SQL ORM
     implementation("org.postgresql:postgresql:42.5.0")
-    implementation("org.jetbrains.exposed:exposed-core:0.40.1")
-    implementation("org.jetbrains.exposed:exposed-dao:0.40.1")
-    implementation("org.jetbrains.exposed:exposed-jdbc:0.40.1")
+    //implementation("org.jetbrains.exposed:exposed-core:0.40.1")
+    //implementation("org.jetbrains.exposed:exposed-dao:0.40.1")
+    //implementation("org.jetbrains.exposed:exposed-jdbc:0.40.1")
+    implementation("org.jetbrains.exposed:exposed-spring-boot-starter:0.40.1")
+    implementation("org.jetbrains.exposed:exposed-java-time:0.40.1")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")

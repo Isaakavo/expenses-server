@@ -6,7 +6,7 @@ echo "Initializing bootJar"
 gradle bootJar
 
 echo "Starting copy"
-cp build/libs/expensesapp-server-0.0.1-SNAPSHOT.jar .
+cp build/libs/expensesapp-server-0.0.1-SNAPSHOT.jar src/main/docker
 
 echo "Starting compose"
-cd src/main/docker || exit && docker-compose up -d
+cd src/main/docker || exit && docker-compose up --build -d
