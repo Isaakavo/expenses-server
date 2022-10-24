@@ -1,40 +1,64 @@
 package com.expenses.app.server.expensesappserver.repository
 
-import com.expenses.app.server.expensesappserver.common.exceptions.EntityNotFoundException
-import com.expenses.app.server.expensesappserver.ui.database.entities.RetirementEntity
-import com.expenses.app.server.expensesappserver.ui.database.entities.RetirementRecord
-import com.expenses.app.server.expensesappserver.ui.database.entities.rowToRetirementRecord
-import org.jetbrains.exposed.dao.id.EntityID
+import com.expenses.app.server.expensesappserver.ui.database.entities.*
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.springframework.stereotype.Repository
 
 @Repository
 class UdiRepository {
-    val crudTable = RetirementEntity
+    val retirementRecordCrudTable = RetirementRecordEntity
+    val udiEntityCrudTable = UdiEntity
 
-    fun insert(retirementRecord: RetirementRecord): EntityID<Long> {
+    fun insert(retirementRecord: RetirementRecord): ResponseRetirementRecord? {
+        //TODO Remove this check when endpoint to add commissions is added
+        val commissionsCheck = transaction { findOneById(retirementRecord.userId) }
+        if (commissionsCheck == null) {
+            transaction {
+                udiEntityCrudTable.new {
+                    userId = retirementRecord.userId
+                    userUdis = 437.12
+                    udiCommision = 26.17
+                }
+            }
+            println("Created commission value")
+        }
         val result = transaction {
             addLogger(StdOutSqlLogger)
-            crudTable
-                .insertAndGetId {
-                    it[userId] = retirementRecord.userId
-                    it[purchaseTotal] = retirementRecord.purchaseTotal
-                    it[dateOfPurchase] = retirementRecord.dateOfPurchase
-                    it[udiValue] = retirementRecord.udiValue
+            retirementRecordCrudTable
+                .new {
+                    userId = retirementRecord.userId
+                    purchaseTotal = retirementRecord.purchaseTotal
+                    dateOfPurchase = retirementRecord.dateOfPurchase
+                    udiValue = retirementRecord.udiValue
                 }
+        }.toRetirementRecord()
+        val commissions = transaction { findOneById(retirementRecord.userId) }
+        if (commissions != null) {
+            val udiconversions = UdiConversions(
+                commissions.userUdis * result.udiValue,
+                result.udiValue * commissions.UdiCommssion
+            )
+            println("Data inserted")
+            return ResponseRetirementRecord(
+                result,
+                commissions,
+                udiconversions
+            )
         }
-        println("Data inserted")
-        return result
+        return null
     }
 
-    fun findAll(id: Long): List<RetirementRecord> = crudTable.select{ RetirementEntity.userId eq id }.map { it.toRetirementRecord() }
+    fun findOneById(userId: String) =
+        udiEntityCrudTable.find { UdiEntityTable.userId eq userId }.limit(1).firstOrNull()?.toUdiEntity()
 
-    operator fun get(id: Long): RetirementRecord? =
-        findOneById(id) ?: throw EntityNotFoundException("Record with id $id not found")
+    //fun findAll(id: String): List<RetirementRecord> = crudTable.select{ RetirementEntity.userId eq id }.map { it.toRetirementRecord() }
 
-    fun findOneById(id: Long) =
-        crudTable.select { RetirementEntity.id eq id }.limit(1).map { it.toRetirementRecord() }.firstOrNull()
+    //operator fun get(id: Long): RetirementRecord? =
+    //  findOneById(id) ?: throw EntityNotFoundException("Record with id $id not found")
+
+    //fun findOneById(id: Long) =
+    //  crudTable.select { RetirementEntity.id eq id }.limit(1).map { it.toRetirementRecord() }.firstOrNull()
 }
 
-private fun ResultRow.toRetirementRecord() = RetirementEntity.rowToRetirementRecord(this)
+//private fun ResultRow.toRetirementRecord() = RetirementEntity.rowToRetirementRecord(this)
