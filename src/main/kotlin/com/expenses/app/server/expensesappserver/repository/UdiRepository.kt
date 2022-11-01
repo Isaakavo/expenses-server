@@ -1,5 +1,6 @@
 package com.expenses.app.server.expensesappserver.repository
 
+import com.expenses.app.server.expensesappserver.common.responses.BodyResponse
 import com.expenses.app.server.expensesappserver.ui.database.entities.*
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -10,7 +11,7 @@ class UdiRepository {
     val retirementRecordCrudTable = RetirementRecordEntity
     val udiEntityCrudTable = UdiEntity
 
-    fun insert(retirementRecord: RetirementRecord): ResponseRetirementRecord? {
+    fun insert(retirementRecord: RetirementRecord): BodyResponse<ResponseRetirementRecord>? {
         //TODO Remove this check when endpoint to add commissions is added
         val commissionsCheck = transaction { findOneById(retirementRecord.userId) }
         if (commissionsCheck == null) {
@@ -28,29 +29,58 @@ class UdiRepository {
             retirementRecordCrudTable
                 .new {
                     userId = retirementRecord.userId
-                    purchaseTotal = retirementRecord.purchaseTotal
-                    dateOfPurchase = retirementRecord.dateOfPurchase
-                    udiValue = retirementRecord.udiValue
+                    purchaseTotal = retirementRecord.purchaseTotal!!
+                    dateOfPurchase = retirementRecord.dateOfPurchase!!
+                    udiValue = retirementRecord.udiValue!!
                 }
         }.toRetirementRecord()
         val commissions = transaction { findOneById(retirementRecord.userId) }
         if (commissions != null) {
-            val udiconversions = UdiConversions(
-                commissions.userUdis * result.udiValue,
-                result.udiValue * commissions.UdiCommssion
-            )
+            val udiconversions = calculateCommissions(commissions.userUdis, commissions.UdiCommssion, result.udiValue!!)
             println("Data inserted")
-            return ResponseRetirementRecord(
-                result,
-                commissions,
-                udiconversions
+            return BodyResponse(
+                listOf(
+                    ResponseRetirementRecord(
+                        result,
+                        commissions,
+                        udiconversions
+                    )
+                )
             )
+
         }
         return null
     }
 
     fun findOneById(userId: String) =
         udiEntityCrudTable.find { UdiEntityTable.userId eq userId }.limit(1).firstOrNull()?.toUdiEntity()
+
+    fun getAllUdi(userId: String): BodyResponse<ResponseRetirementRecord>? {
+        val commission = transaction { findOneById(userId) }
+        if (commission != null) {
+            val retirementData = transaction {
+                addLogger(StdOutSqlLogger)
+                retirementRecordCrudTable.find { RetirementTable.userId eq userId }.map { it.toRetirementRecord() }
+            }
+            val udiResponseList = mutableListOf<ResponseRetirementRecord>()
+            retirementData.forEach { value ->
+                val udiConversion = calculateCommissions(
+                    commission.userUdis,
+                    commission.UdiCommssion,
+                    value.udiValue!!
+                )
+                udiResponseList.add(
+                    ResponseRetirementRecord(
+                        value,
+                        commission, udiConversion
+                    )
+
+                )
+            }
+            return BodyResponse(udiResponseList)
+        }
+        return null
+    }
 
     //fun findAll(id: String): List<RetirementRecord> = crudTable.select{ RetirementEntity.userId eq id }.map { it.toRetirementRecord() }
 
@@ -59,6 +89,13 @@ class UdiRepository {
 
     //fun findOneById(id: Long) =
     //  crudTable.select { RetirementEntity.id eq id }.limit(1).map { it.toRetirementRecord() }.firstOrNull()
+
+    private fun calculateCommissions(userUdis: Double, udiCommission: Double, udiValue: Double): UdiConversions {
+        return UdiConversions(
+            udiConversion = userUdis * udiValue,
+            udiCommissionConversion = udiValue * udiCommission
+        )
+    }
 }
 
 //private fun ResultRow.toRetirementRecord() = RetirementEntity.rowToRetirementRecord(this)

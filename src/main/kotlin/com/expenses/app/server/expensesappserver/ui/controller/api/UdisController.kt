@@ -1,7 +1,6 @@
 package com.expenses.app.server.expensesappserver.ui.controller.api
 
 import com.expenses.app.server.expensesappserver.common.responses.ApiResponse
-import com.expenses.app.server.expensesappserver.common.responses.BodyResponse
 import com.expenses.app.server.expensesappserver.repository.UdiRepository
 import com.expenses.app.server.expensesappserver.ui.database.entities.RetirementRecord
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -28,8 +27,17 @@ class UdisController(
     }
 
     @GetMapping("/get-all-udis", produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun getAllUdi() {
-
+    fun getAllUdi(request: HttpServletRequest, @RequestBody body: String): ApiResponse {
+        val data = mapper.readValue<RetirementRecord>(body, RetirementRecord::class.java)
+        val dataForUser = udiRepository.getAllUdi(data.userId)
+        if (dataForUser != null) {
+            return ApiResponse(
+                ApiResponse.Status.SUCCESS,
+                "Result for userId ${data.userId}",
+                dataForUser
+            )
+        }
+        return ApiResponse(ApiResponse.Status.FAIL, "No data for this user", null)
     }
 
     @PostMapping("/insert-udi", produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -39,8 +47,8 @@ class UdisController(
             val retirementRecord = udiRepository.insert(data)
             return ApiResponse(
                 ApiResponse.Status.SUCCESS,
-                "Element inserted with id ${retirementRecord?.retirementRecord?.id?.value}",
-                BodyResponse(retirementRecord)
+                "Element inserted with id ${retirementRecord?.obj?.get(0)?.retirementRecord?.id?.value}",
+                retirementRecord
             )
         }
         return ApiResponse(ApiResponse.Status.FAIL, "Couldn't insert data", null)

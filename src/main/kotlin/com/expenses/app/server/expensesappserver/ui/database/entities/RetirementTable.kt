@@ -21,9 +21,9 @@ data class RetirementRecord(
     @JsonIgnore
     var id: EntityID<Long>?,
     val userId: String,
-    val purchaseTotal: Double,
-    val dateOfPurchase: LocalDateTime,
-    val udiValue: Double,
+    val purchaseTotal: Double?,
+    val dateOfPurchase: LocalDateTime?,
+    val udiValue: Double?,
 )
 
 data class ResponseRetirementRecord(
