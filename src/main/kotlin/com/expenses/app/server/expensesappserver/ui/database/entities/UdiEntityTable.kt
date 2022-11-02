@@ -20,6 +20,12 @@ data class UdiCommission(
     val UdiCommssion: Double
 )
 
+data class UdiCommissionPost(
+    val userId: String,
+    val userUdis: Double,
+    val UdiCommssion: Double
+)
+
 class UdiEntity(id: EntityID<Int>): IntEntity(id) {
     companion object: IntEntityClass<UdiEntity>(UdiEntityTable)
 

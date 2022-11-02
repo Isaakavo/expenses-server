@@ -18,15 +18,14 @@ object RetirementTable : LongIdTable("udis_table") {
 }
 
 data class RetirementRecord(
-    @JsonIgnore
-    var id: EntityID<Long>? = null,
+    var id: Long? = null,
     @JsonIgnore
     val userId: String,
-    val purchaseTotal: Double?,
-    val dateOfPurchase: LocalDateTime?,
-    val udiValue: Double?,
+    val purchaseTotal: Double,
+    val dateOfPurchase: LocalDateTime,
+    val udiValue: Double,
 )
-
+//TODO move this data classes to another file where all the request classes will live
 data class RetirementRecordGet(
     val userId: String
 )
@@ -61,7 +60,7 @@ data class UdiConversions(
      var udiValue by RetirementTable.udiValue
 
      fun toRetirementRecord() = RetirementRecord(
-         id,
+         id.value,
         userId,
          purchaseTotal,
          dateOfPurchase,
