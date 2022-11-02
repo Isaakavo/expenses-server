@@ -19,11 +19,23 @@ object RetirementTable : LongIdTable("udis_table") {
 
 data class RetirementRecord(
     @JsonIgnore
-    var id: EntityID<Long>?,
+    var id: EntityID<Long>? = null,
+    @JsonIgnore
     val userId: String,
     val purchaseTotal: Double?,
     val dateOfPurchase: LocalDateTime?,
     val udiValue: Double?,
+)
+
+data class RetirementRecordGet(
+    val userId: String
+)
+
+data class RetirementRecordPost(
+    val userId: String,
+    val purchaseTotal: Double,
+    val dateOfPurchase: LocalDateTime,
+    val udiValue: Double,
 )
 
 data class ResponseRetirementRecord(

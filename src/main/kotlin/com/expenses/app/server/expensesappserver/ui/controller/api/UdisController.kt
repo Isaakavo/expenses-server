@@ -4,7 +4,8 @@ import com.expenses.app.server.expensesappserver.common.responses.ApiResponse
 import com.expenses.app.server.expensesappserver.common.responses.ApiResponse.Status.SUCCESS
 import com.expenses.app.server.expensesappserver.common.responses.ApiResponse.Status.FAIL
 import com.expenses.app.server.expensesappserver.repository.UdiRepository
-import com.expenses.app.server.expensesappserver.ui.database.entities.RetirementRecord
+import com.expenses.app.server.expensesappserver.ui.database.entities.RetirementRecordGet
+import com.expenses.app.server.expensesappserver.ui.database.entities.RetirementRecordPost
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -32,7 +33,7 @@ class UdisController(
 
     @GetMapping("/udis", produces = [MediaType.APPLICATION_JSON_VALUE])
     fun getAllUdi(request: HttpServletRequest, @RequestBody body: String): ResponseEntity<ApiResponse> {
-        val data = mapper.readValue<RetirementRecord>(body, RetirementRecord::class.java)
+        val data = mapper.readValue<RetirementRecordGet>(body, RetirementRecordGet::class.java)
         val dataForUser = udiRepository.getAllUdi(data.userId)
         if (dataForUser != null) {
             return ResponseEntity(
@@ -43,6 +44,7 @@ class UdisController(
                 ), HttpStatus.OK
             )
         }
+
         return ResponseEntity(
             ApiResponse(FAIL, "No data for this user", null),
             HttpStatus.NOT_FOUND
@@ -51,7 +53,7 @@ class UdisController(
 
     @PostMapping("/udis", produces = [MediaType.APPLICATION_JSON_VALUE])
     fun insertUdi(request: HttpServletRequest, @RequestBody body: String): ResponseEntity<ApiResponse> {
-        val data = mapper.readValue<RetirementRecord>(body, RetirementRecord::class.java)
+        val data = mapper.readValue<RetirementRecordPost>(body, RetirementRecordPost::class.java)
         if (data != null) {
             val retirementRecord = udiRepository.insert(data)
             return ResponseEntity(

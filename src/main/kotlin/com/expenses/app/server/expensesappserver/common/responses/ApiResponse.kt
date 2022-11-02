@@ -10,5 +10,6 @@ data class ApiResponse(val status: Status, val message: String, val body: BodyRe
 }
 
 data class BodyResponse<out T>(
+    val userId: String,
     val obj: List<T>,
 )

@@ -1,5 +1,6 @@
 package com.expenses.app.server.expensesappserver.ui.database.entities
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import org.jetbrains.exposed.dao.IntEntity
 import org.jetbrains.exposed.dao.IntEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
@@ -13,7 +14,8 @@ object UdiEntityTable: IntIdTable("udis_commisions") {
 }
 
 data class UdiCommission(
-    val userId: String,
+    @JsonIgnore
+    val userId: String?,
     val userUdis: Double,
     val UdiCommssion: Double
 )

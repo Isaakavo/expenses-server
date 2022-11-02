@@ -11,7 +11,7 @@ class UdiRepository {
     val retirementRecordCrudTable = RetirementRecordEntity
     val udiEntityCrudTable = UdiEntity
 
-    fun insert(retirementRecord: RetirementRecord): BodyResponse<ResponseRetirementRecord>? {
+    fun insert(retirementRecord: RetirementRecordPost): BodyResponse<ResponseRetirementRecord>? {
         //TODO Remove this check when endpoint to add commissions is added
         val commissionsCheck = transaction { findOneById(retirementRecord.userId) }
         if (commissionsCheck == null) {
@@ -29,17 +29,19 @@ class UdiRepository {
             retirementRecordCrudTable
                 .new {
                     userId = retirementRecord.userId
-                    purchaseTotal = retirementRecord.purchaseTotal!!
-                    dateOfPurchase = retirementRecord.dateOfPurchase!!
-                    udiValue = retirementRecord.udiValue!!
+                    purchaseTotal = retirementRecord.purchaseTotal
+                    dateOfPurchase = retirementRecord.dateOfPurchase
+                    udiValue = retirementRecord.udiValue
                 }
         }.toRetirementRecord()
         val commissions = transaction { findOneById(retirementRecord.userId) }
         if (commissions != null) {
-            val udiconversions = calculateCommissions(commissions.userUdis, commissions.UdiCommssion, result.udiValue!!)
+            val udiconversions =
+                calculateCommissions(commissions.userUdis, commissions.UdiCommssion, result.udiValue!!)
             println("Data inserted")
             return BodyResponse(
-                listOf(
+                userId = retirementRecord.userId,
+                obj = listOf(
                     ResponseRetirementRecord(
                         result,
                         commissions,
@@ -77,7 +79,7 @@ class UdiRepository {
 
                 )
             }
-            return BodyResponse(udiResponseList)
+            return BodyResponse(userId = userId, obj = udiResponseList)
         }
         return null
     }
