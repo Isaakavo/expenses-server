@@ -1,18 +1,10 @@
 package com.expenses.app.server.expensesappserver.ui.controller.api
 
-import com.expenses.app.server.expensesappserver.common.responses.ApiResponse
-import com.expenses.app.server.expensesappserver.common.responses.Status.SUCCESS
-import com.expenses.app.server.expensesappserver.common.responses.Status.FAIL
-import com.expenses.app.server.expensesappserver.common.responses.ApiResponseCommission
 import com.expenses.app.server.expensesappserver.repository.UdiRepository
-import com.expenses.app.server.expensesappserver.ui.database.entities.RetirementRecordGet
-import com.expenses.app.server.expensesappserver.ui.database.entities.RetirementRecordPost
-import com.expenses.app.server.expensesappserver.ui.database.entities.UdiCommissionPost
+import com.expenses.app.server.expensesappserver.ui.database.entities.*
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
-import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import javax.servlet.http.HttpServletRequest
 
@@ -30,77 +22,42 @@ class UdisController(
     }
 
     @GetMapping("/udis", produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun getAllUdi(request: HttpServletRequest, @RequestBody body: String): ResponseEntity<ApiResponse> {
+    fun getAllUdi(request: HttpServletRequest, @RequestBody body: String): List<ResponseRetirementRecord>? {
         val data = mapper.readValue<RetirementRecordGet>(body, RetirementRecordGet::class.java)
-        val dataForUser = udiRepository.getAllUdi(data.userId)
-        if (dataForUser != null) {
-            return ResponseEntity(
-                ApiResponse(
-                    SUCCESS,
-                    dataForUser
-                ), HttpStatus.OK
-            )
-        }
-
-        return ResponseEntity(
-            ApiResponse(FAIL, null),
-            HttpStatus.NOT_FOUND
-        )
+        return udiRepository.getAllUdi(data.userId)
     }
 
     @GetMapping("/udis/{id}", produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun getUdiById(@PathVariable(value = "id") id: Long): ResponseEntity<ApiResponse> {
-        return ResponseEntity(ApiResponse(SUCCESS,udiRepository.getUdiById(id)), HttpStatus.OK)
+    fun getUdiById(@PathVariable(value = "id") id: Long): ResponseRetirementRecord {
+        return udiRepository.getUdiById(id)
     }
 
     @PostMapping("/udis", produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun insertUdi(request: HttpServletRequest, @RequestBody body: String): ResponseEntity<ApiResponse> {
+    fun insertUdi(request: HttpServletRequest, @RequestBody body: String): ResponseRetirementRecord {
         val data = mapper.readValue<RetirementRecordPost>(body, RetirementRecordPost::class.java)
-        if (data != null) {
-            val retirementRecord = udiRepository.insertUdi(data)
-            return ResponseEntity(
-                ApiResponse(
-                    SUCCESS,
-                    retirementRecord
-                ), HttpStatus.CREATED
-            )
-        }
-        return ResponseEntity(
-            ApiResponse(FAIL, null),
-            HttpStatus.BAD_REQUEST
-        )
+        return udiRepository.insertUdi(data)
     }
 
     @PutMapping("/udis/{id}", produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun updateUdi(@PathVariable(value = "id") id: Long, @RequestBody body: String): ResponseEntity<ApiResponse> {
+    fun updateUdi(@PathVariable(value = "id") id: Long, @RequestBody body: String): ResponseRetirementRecord {
         val data = mapper.readValue<RetirementRecordPost>(body, RetirementRecordPost::class.java)
-        val response = udiRepository.updateUdi(id, data)
-
-        return if(response.userId != null) ResponseEntity(ApiResponse(SUCCESS, response), HttpStatus.OK)
-        else ResponseEntity(ApiResponse(FAIL, response), HttpStatus.NOT_FOUND)
+        return udiRepository.updateUdi(id, data)
     }
 
     @DeleteMapping("/udis/{id}", produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun deleteUdi(@PathVariable(value = "id") id: Long): ResponseEntity<ApiResponse>{
-        val result = udiRepository.deleteUdi(id)
-
-        return if (result.userId == null) ResponseEntity(ApiResponse(FAIL, result), HttpStatus.NOT_FOUND)
-        else ResponseEntity(ApiResponse(SUCCESS, result), HttpStatus.OK)
+    fun deleteUdi(@PathVariable(value = "id") id: Long): ResponseRetirementRecord {
+        return udiRepository.deleteUdi(id)
     }
 
     @GetMapping("/udis/commission", produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun getCommission(@RequestBody body: String): ResponseEntity<ApiResponseCommission> {
+    fun getCommission(@RequestBody body: String): UdiCommission {
         val data = mapper.readValue<RetirementRecordGet>(body, RetirementRecordGet::class.java)
-        return ResponseEntity(
-            ApiResponseCommission(SUCCESS, udiRepository.getCommissionById(data.userId)),
-            HttpStatus.OK
-        )
+        return udiRepository.findCommissionById(data.userId)
     }
 
     @PostMapping("/udis/commission", produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun insertCommission(@RequestBody body: String): ResponseEntity<ApiResponseCommission> {
+    fun insertCommission(@RequestBody body: String): UdiCommission{
         val data = mapper.readValue<UdiCommissionPost>(body, UdiCommissionPost::class.java)
-        val insertedData = udiRepository.insertUpdateCommission(data)
-        return ResponseEntity(ApiResponseCommission(SUCCESS, insertedData), HttpStatus.CREATED)
+        return udiRepository.insertUpdateCommission(data)
     }
 }

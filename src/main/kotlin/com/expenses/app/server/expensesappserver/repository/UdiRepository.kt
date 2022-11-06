@@ -1,6 +1,7 @@
 package com.expenses.app.server.expensesappserver.repository
 
-import com.expenses.app.server.expensesappserver.common.responses.BodyResponse
+import com.expenses.app.server.expensesappserver.common.exceptions.EntityNotFoundException
+import com.expenses.app.server.expensesappserver.common.responses.Status
 import com.expenses.app.server.expensesappserver.ui.database.entities.*
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
@@ -13,58 +14,44 @@ class UdiRepository {
     val udiEntityCrudTable = UdiEntity
 
     //TODO implement logic to check if the row belongs to the user id
-    fun getUdiById(id: Long): BodyResponse<ResponseRetirementRecord> {
-        val retirementRecord = findUdiById(id) ?: return BodyResponse(message = "This record doesnt exists")
-        val commissions = findCommissionById(retirementRecord.userId) ?: return BodyResponse( userId = retirementRecord.userId, message = "This user doesnt have commissions")
+    fun getUdiById(id: Long): ResponseRetirementRecord {
+        val retirementRecord = findUdiById(id)
+        val commissions = findCommissionById(retirementRecord.userId)
         val udiconversions =
             calculateCommissions(commissions.userUdis, commissions.UdiCommssion, retirementRecord.udiValue)
-        return BodyResponse(
-            userId = retirementRecord.userId,
-            message = "Element found",
-            data = listOf(
-                ResponseRetirementRecord(
-                    retirementRecord,
-                    commissions,
-                    udiconversions
-                )
-            )
+        return ResponseRetirementRecord(
+            retirementRecord,
+            commissions,
+            udiconversions
         )
     }
 
-    fun getAllUdi(userId: String): BodyResponse<ResponseRetirementRecord>? {
+    fun getAllUdi(userId: String): List<ResponseRetirementRecord>? {
         val commission = transaction { findCommissionById(userId) }
-        if (commission != null) {
-            val retirementData = transaction {
-                addLogger(StdOutSqlLogger)
-                retirementRecordCrudTable.find { RetirementTable.userId eq userId }.map { it.toRetirementRecord() }
-            }
-            val udiResponseList = mutableListOf<ResponseRetirementRecord>()
-            retirementData.forEach { value ->
-                val udiConversion = calculateCommissions(
-                    commission.userUdis,
-                    commission.UdiCommssion,
-                    value.udiValue
-                )
-                udiResponseList.add(
-                    ResponseRetirementRecord(
-                        value,
-                        commission, udiConversion
-                    )
-
-                )
-            }
-            return BodyResponse(userId = userId, data = udiResponseList)
+        val retirementData = transaction {
+            addLogger(StdOutSqlLogger)
+            retirementRecordCrudTable.find { RetirementTable.userId eq userId }.map { it.toRetirementRecord() }
         }
-        return null
+        val udiResponseList = mutableListOf<ResponseRetirementRecord>()
+        retirementData.forEach { value ->
+            val udiConversion = calculateCommissions(
+                commission.userUdis,
+                commission.UdiCommssion,
+                value.udiValue
+            )
+            udiResponseList.add(
+                ResponseRetirementRecord(
+                    value,
+                    commission, udiConversion
+                )
+
+            )
+        }
+        return udiResponseList.toList()
     }
 
-    fun insertUdi(retirementRecord: RetirementRecordPost): BodyResponse<ResponseRetirementRecord> {
+    fun insertUdi(retirementRecord: RetirementRecordPost): ResponseRetirementRecord {
         val commissions = findCommissionById(retirementRecord.userId)
-            ?: return BodyResponse(
-                userId = retirementRecord.userId,
-                message = "Couldn't found a commission value for this user, please add a new one",
-                data = emptyList()
-            )
         val result = transaction {
             addLogger(StdOutSqlLogger)
             retirementRecordCrudTable
@@ -77,77 +64,46 @@ class UdiRepository {
         }.toRetirementRecord()
         val udiconversions =
             calculateCommissions(commissions.userUdis, commissions.UdiCommssion, result.udiValue)
-        return BodyResponse(
-            userId = retirementRecord.userId,
-            message = "Element inserted with id ${result.id}",
-            data = listOf(
-                ResponseRetirementRecord(
-                    result,
-                    commissions,
-                    udiconversions
-                )
-            )
+        return ResponseRetirementRecord(
+            result,
+            commissions,
+            udiconversions
         )
     }
 
-    fun updateUdi(id: Long, retirementRecordPost: RetirementRecordPost): BodyResponse<ResponseRetirementRecord> {
-        val retirementRecord = findUdiById(id) ?: return BodyResponse(message = "This record doesnt exists")
+    fun updateUdi(id: Long, retirementRecordPost: RetirementRecordPost): ResponseRetirementRecord {
+        val retirementRecord = findUdiById(id)
         val commissions = findCommissionById(retirementRecord.userId)
-        if (commissions != null) {
-            transaction {
-                addLogger(StdOutSqlLogger)
-                retirementRecordCrudTable
-                    .table.update({ RetirementTable.id eq id }) {
-                        it[RetirementTable.udiValue] = retirementRecordPost.udiValue
-                        it[RetirementTable.dateOfPurchase] = retirementRecordPost.dateOfPurchase
-                        it[RetirementTable.purchaseTotal] = retirementRecordPost.purchaseTotal
-                    }
-            }
-            val udiconversions =
-                calculateCommissions(commissions.userUdis, commissions.UdiCommssion, retirementRecordPost.udiValue)
-            val newRetirementRecord = findUdiById(id)
-            return if (newRetirementRecord != null) BodyResponse(
-                userId = retirementRecord.userId,
-                message = "Element updated",
-                data = listOf(
-                    ResponseRetirementRecord(
-                        newRetirementRecord,
-                        commissions,
-                        udiconversions
-                    )
-                )
-            ) else BodyResponse("something went wrong")
+        transaction {
+            addLogger(StdOutSqlLogger)
+            retirementRecordCrudTable
+                .table.update({ RetirementTable.id eq id }) {
+                    it[RetirementTable.udiValue] = retirementRecordPost.udiValue
+                    it[RetirementTable.dateOfPurchase] = retirementRecordPost.dateOfPurchase
+                    it[RetirementTable.purchaseTotal] = retirementRecordPost.purchaseTotal
+                }
         }
-        return BodyResponse("something went wrong")
+        val udiconversions =
+            calculateCommissions(commissions.userUdis, commissions.UdiCommssion, retirementRecordPost.udiValue)
+        val newRetirementRecord = findUdiById(id)
+        return ResponseRetirementRecord(
+            newRetirementRecord,
+            commissions,
+            udiconversions
+        )
     }
 
-    fun deleteUdi(id: Long): BodyResponse<ResponseRetirementRecord> {
-        val singleRetirementRecord = transaction {
-            retirementRecordCrudTable.find { RetirementTable.id eq id }.limit(1).firstOrNull()?.toRetirementRecord()
+    fun deleteUdi(id: Long): ResponseRetirementRecord {
+        val singleRetirementRecord = findUdiById(id)
+        transaction {
+            retirementRecordCrudTable.table.deleteWhere { RetirementTable.id eq id }
         }
-        if (singleRetirementRecord != null) {
-            transaction {
-                retirementRecordCrudTable.table.deleteWhere { RetirementTable.id eq id }
-            }
-            return BodyResponse(userId = singleRetirementRecord.userId, message = "Element deleted")
-        }
-
-        return BodyResponse(message = "Element Doest exists")
+        return ResponseRetirementRecord(singleRetirementRecord)
     }
 
-    fun insertUpdateCommission(udiCommissionPost: UdiCommissionPost): BodyResponse<UdiCommission>? {
+    //TODO find a way to detect if the commission exist or not, and if not insert a new one
+    fun insertUpdateCommission(udiCommissionPost: UdiCommissionPost): UdiCommission {
         when (findCommissionById(udiCommissionPost.userId)) {
-            null -> {
-                val result = transaction {
-                    udiEntityCrudTable.new {
-                        userId = udiCommissionPost.userId
-                        userUdis = udiCommissionPost.userUdis
-                        udiCommision = udiCommissionPost.UdiCommssion
-                    }
-                }.toUdiEntity()
-                return BodyResponse(userId = udiCommissionPost.userId, message = "Created new element", listOf(result))
-            }
-
             else -> {
                 transaction {
                     udiEntityCrudTable.table.update({ UdiEntityTable.userId eq udiCommissionPost.userId }) {
@@ -155,16 +111,7 @@ class UdiRepository {
                         it[UdiEntityTable.userUdis] = udiCommissionPost.userUdis
                     }
                 }
-                val commission = findCommissionById(udiCommissionPost.userId)
-                return if (commission != null) BodyResponse(
-                    userId = udiCommissionPost.userId,
-                    message = "Updated element",
-                    listOf(commission)
-                )
-                else BodyResponse(
-                    userId = udiCommissionPost.userId,
-                    message = "Couldt update the element"
-                )
+                return findCommissionById(udiCommissionPost.userId)
             }
         }
     }
@@ -172,23 +119,25 @@ class UdiRepository {
 
     fun findUdiById(id: Long) = transaction {
         retirementRecordCrudTable.find { RetirementTable.id eq id }.limit(1).firstOrNull()?.toRetirementRecord()
-    }
+    } ?: throw EntityNotFoundException(
+        status = Status.NO_DATA,
+        customMessage = "This udi id doesnt exists",
+        id = id.toString()
+    )
 
     fun findCommissionById(userId: String) =
         transaction {
             udiEntityCrudTable.find { UdiEntityTable.userId eq userId }.limit(1).firstOrNull()?.toUdiEntity()
-        }
+        } ?: throw EntityNotFoundException(
+            status = Status.NO_COMMISSION_DATA,
+            customMessage = "No data for this user",
+            id = userId
+        )
 
 //    fun findCommissionById(id: Int) =
 //        transaction {
 //            udiEntityCrudTable.find { UdiEntityTable.id eq id }.limit(1).firstOrNull()?.toUdiEntity()
 //        }
-
-
-
-    fun getCommissionById(userId: String): BodyResponse<UdiCommission?>? {
-        return BodyResponse(userId = userId, message = "Returning value", listOf(findCommissionById(userId)))
-    }
 
     //fun findAll(id: String): List<RetirementRecord> = crudTable.select{ RetirementEntity.userId eq id }.map { it.toRetirementRecord() }
 

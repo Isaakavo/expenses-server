@@ -38,9 +38,9 @@ data class RetirementRecordPost(
 )
 
 data class ResponseRetirementRecord(
-    val retirementRecord: RetirementRecord,
-    val udiCommission: UdiCommission,
-    val udiConversions: UdiConversions
+    val retirementRecord: RetirementRecord? = null,
+    val udiCommission: UdiCommission? = null,
+    val udiConversions: UdiConversions? = null
 )
 
 data class UdiConversions(
