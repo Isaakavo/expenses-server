@@ -1,15 +1,22 @@
 package com.expenses.app.server.expensesappserver.security
 
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity
+import org.springframework.security.config.annotation.method.configuration.GlobalMethodSecurityConfiguration
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter
+import org.springframework.security.web.SecurityFilterChain
 
-//TODO change to not deprecated
+@Configuration
 @EnableWebSecurity
-class SecurityConfiguration: WebSecurityConfigurerAdapter() {
-    override fun configure(http: HttpSecurity) {
+@EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true, jsr250Enabled = true)
+class SecurityConfig {
+
+    @Bean
+    fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
         http
             .authorizeRequests { authorize ->
                 authorize
@@ -21,6 +28,8 @@ class SecurityConfiguration: WebSecurityConfigurerAdapter() {
                         jwt.jwtAuthenticationConverter(grantedAuthoritiesExtractor())
                     }
             }
+
+        return http.build()
     }
 
     private fun grantedAuthoritiesExtractor(): JwtAuthenticationConverter {
