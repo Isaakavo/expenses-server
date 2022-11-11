@@ -16,13 +16,13 @@ repositories {
 }
 
 dependencies {
-    //implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
-    //implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
+    implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
-    //implementation("com.amazonaws:aws-java-sdk:1.12.322")
+    implementation("com.amazonaws:aws-java-sdk:1.12.322")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 
     // SQL ORM
