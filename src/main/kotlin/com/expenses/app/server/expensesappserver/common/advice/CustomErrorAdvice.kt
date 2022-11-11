@@ -1,4 +1,4 @@
-package com.expenses.app.server.expensesappserver
+package com.expenses.app.server.expensesappserver.common.advice
 
 import com.expenses.app.server.expensesappserver.common.exceptions.EntityNotFoundException
 import com.expenses.app.server.expensesappserver.common.exceptions.UnauthorizedException

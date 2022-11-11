@@ -16,8 +16,8 @@ class UdiRepository {
 
     fun getUdiById(id: Long, userId: String): ResponseRetirementRecord {
         val retirementRecord = findUdiById(id)
-        validateOwnership (retirementRecord.userId, userId)
-        val commissions = findCommissionById(retirementRecord.userId)
+        validateOwnership(retirementRecord.userId, userId)
+        val commissions = validatedCommissionById(retirementRecord.userId)
         val udiconversions =
             calculateCommissions(commissions.userUdis, commissions.UdiCommssion, retirementRecord.udiValue)
         return ResponseRetirementRecord(
@@ -28,7 +28,7 @@ class UdiRepository {
     }
 
     fun getAllUdi(userId: String): List<ResponseRetirementRecord>? {
-        val commission = transaction { findCommissionById(userId) }
+        val commission = validatedCommissionById(userId)
         val retirementData = transaction {
             addLogger(StdOutSqlLogger)
             retirementRecordCrudTable.find { RetirementTable.userId eq userId }.map { it.toRetirementRecord() }
@@ -52,7 +52,7 @@ class UdiRepository {
     }
 
     fun insertUdi(retirementRecord: RetirementRecordPost): ResponseRetirementRecord {
-        val commissions = findCommissionById(retirementRecord.userId)
+        val commissions = validatedCommissionById(retirementRecord.userId)
         val result = transaction {
             addLogger(StdOutSqlLogger)
             retirementRecordCrudTable
@@ -74,7 +74,7 @@ class UdiRepository {
 
     fun updateUdi(id: Long, retirementRecordPost: RetirementRecordPost): ResponseRetirementRecord {
         val retirementRecord = findUdiById(id)
-        val commissions = findCommissionById(retirementRecord.userId)
+        val commissions = validatedCommissionById(retirementRecord.userId)
         transaction {
             addLogger(StdOutSqlLogger)
             retirementRecordCrudTable
@@ -102,9 +102,24 @@ class UdiRepository {
         return ResponseRetirementRecord(singleRetirementRecord)
     }
 
-    //TODO find a way to detect if the commission exist or not, and if not insert a new one
-    fun insertUpdateCommission(udiCommissionPost: UdiCommissionPost): UdiCommission {
-        when (findCommissionById(udiCommissionPost.userId)) {
+    fun insertCommission(udiCommissionPost: UdiCommissionPost): UdiCommission {
+        transaction {
+            udiEntityCrudTable.new {
+                userId = udiCommissionPost.userId
+                userUdis = udiCommissionPost.userUdis
+                udiCommision = udiCommissionPost.UdiCommssion
+            }
+        }
+        return validatedCommissionById(udiCommissionPost.userId)
+    }
+
+
+    fun updateCommission(udiCommissionPost: UdiCommissionPost): UdiCommission {
+        return when (findCommissionById(udiCommissionPost.userId)) {
+            null -> {
+                insertCommission(udiCommissionPost)
+            }
+
             else -> {
                 transaction {
                     udiEntityCrudTable.table.update({ UdiEntityTable.userId eq udiCommissionPost.userId }) {
@@ -112,7 +127,7 @@ class UdiRepository {
                         it[UdiEntityTable.userUdis] = udiCommissionPost.userUdis
                     }
                 }
-                return findCommissionById(udiCommissionPost.userId)
+                validatedCommissionById(udiCommissionPost.userId)
             }
         }
     }
@@ -126,16 +141,18 @@ class UdiRepository {
         id = id.toString()
     )
 
+    fun validatedCommissionById(userId: String) = findCommissionById(userId) ?: throw EntityNotFoundException(
+        status = Status.NO_COMMISSION_DATA,
+        customMessage = "No data for this user",
+        id = userId
+    )
+
     fun findCommissionById(userId: String) =
         transaction {
             udiEntityCrudTable.find { UdiEntityTable.userId eq userId }.limit(1).firstOrNull()?.toUdiEntity()
-        } ?: throw EntityNotFoundException(
-            status = Status.NO_COMMISSION_DATA,
-            customMessage = "No data for this user",
-            id = userId
-        )
+        }
 
-    private fun validateOwnership(userId: String, bodyUserId: String ) {
+    private fun validateOwnership(userId: String, bodyUserId: String) {
         if (userId != bodyUserId) throw UnauthorizedException(
             status = Status.UNAUTHORIZED,
             customMessage = "The user doesnt own this data"
