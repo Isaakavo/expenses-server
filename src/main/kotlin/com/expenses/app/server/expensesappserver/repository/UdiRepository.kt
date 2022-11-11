@@ -3,6 +3,7 @@ package com.expenses.app.server.expensesappserver.repository
 import com.expenses.app.server.expensesappserver.common.exceptions.EntityNotFoundException
 import com.expenses.app.server.expensesappserver.common.exceptions.UnauthorizedException
 import com.expenses.app.server.expensesappserver.common.responses.Status
+import com.expenses.app.server.expensesappserver.security.AuthenticationFacade
 import com.expenses.app.server.expensesappserver.ui.database.entities.*
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
@@ -10,10 +11,13 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import org.springframework.stereotype.Repository
 
 @Repository
-class UdiRepository {
+class UdiRepository(
+    private val authenticationFacade: AuthenticationFacade
+) {
     val retirementRecordCrudTable = RetirementRecordEntity
     val udiEntityCrudTable = UdiEntity
 
+    //TODO replace all userId for userId from context
     fun getUdiById(id: Long, userId: String): ResponseRetirementRecord {
         val retirementRecord = findUdiById(id)
         validateOwnership(retirementRecord.userId, userId)
@@ -27,7 +31,8 @@ class UdiRepository {
         )
     }
 
-    fun getAllUdi(userId: String): List<ResponseRetirementRecord>? {
+    fun getAllUdi(): List<ResponseRetirementRecord>? {
+        val userId = authenticationFacade.userId()
         val commission = validatedCommissionById(userId)
         val retirementData = transaction {
             addLogger(StdOutSqlLogger)

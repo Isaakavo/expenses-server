@@ -1,7 +1,6 @@
 package com.expenses.app.server.expensesappserver.ui.controller.api
 
 import com.expenses.app.server.expensesappserver.repository.UdiRepository
-import com.expenses.app.server.expensesappserver.security.JwtProvider
 import com.expenses.app.server.expensesappserver.ui.database.entities.*
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.beans.factory.annotation.Autowired
@@ -12,8 +11,7 @@ import javax.servlet.http.HttpServletRequest
 @RestController
 @RequestMapping("/api")
 class UdisController(
-    private val udiRepository: UdiRepository,
-    private val jwtProvider: JwtProvider
+    private val udiRepository: UdiRepository
 ) {
 
     //TODO check if I can use the bearer token to extract user id instead of passing in the request
@@ -25,11 +23,9 @@ class UdisController(
     }
 
     @GetMapping("/udis", produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun getAllUdi(request: HttpServletRequest, @RequestBody body: String): List<ResponseRetirementRecord>? {
-        val data = mapper.readValue<RetirementRecordGet>(body, RetirementRecordGet::class.java)
-        val jwt = jwtProvider.authentication(request)
-        println(jwt)
-        return udiRepository.getAllUdi(data.userId)
+    fun getAllUdi(request: HttpServletRequest): List<ResponseRetirementRecord>? {
+        //val data = mapper.readValue<RetirementRecordGet>(body, RetirementRecordGet::class.java)
+        return udiRepository.getAllUdi()
     }
 
     @GetMapping("/udis/{id}", produces = [MediaType.APPLICATION_JSON_VALUE])

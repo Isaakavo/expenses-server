@@ -5,14 +5,17 @@ import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.proc.ConfigurableJWTProcessor
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.security.core.Authentication
-import org.springframework.security.core.GrantedAuthority
-import org.springframework.security.core.authority.SimpleGrantedAuthority
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource
 import org.springframework.stereotype.Component
+import org.springframework.web.filter.OncePerRequestFilter
+import javax.servlet.FilterChain
 import javax.servlet.http.HttpServletRequest
+import javax.servlet.http.HttpServletResponse
 
 @Component
-class JwtProvider {
+class JwtTokenFilter: OncePerRequestFilter() {
 
     @Autowired
     var configurableJWTProcessor: ConfigurableJWTProcessor<SecurityContext>? = null
@@ -27,20 +30,40 @@ class JwtProvider {
         private const val USERNAME_FIELD = "username"
     }
 
-    //TODO refactor to extract username and check how to implement this correctly
-    fun authentication(request: HttpServletRequest): Authentication? {
+    override fun doFilterInternal(
+        request: HttpServletRequest,
+        response: HttpServletResponse,
+        filterChain: FilterChain
+    ) {
+        //TODO investigate more about SecurityContextHolder
         request.getHeader(AUTHORIZATION)?.let { token ->
             val claims = configurableJWTProcessor?.process(getToken(token), null)
             validateToken(claims)
             val username = getUsername(claims)
             if (username != null) {
                 println(username)
-                val authorities = listOf<GrantedAuthority>(SimpleGrantedAuthority("ROLE_USER"))
-                return JwtAuthenticator(authorities, null, claims)
+                val auth = UsernamePasswordAuthenticationToken(username, null)
+                auth.details = WebAuthenticationDetailsSource().buildDetails(request)
+                SecurityContextHolder.getContext().authentication = auth
             }
         }
-        return null
+        filterChain.doFilter(request, response)
     }
+
+    //TODO refactor to extract username and check how to implement this correctly
+//    fun authentication(request: HttpServletRequest): Authentication? {
+//        request.getHeader(AUTHORIZATION)?.let { token ->
+//            val claims = configurableJWTProcessor?.process(getToken(token), null)
+//            validateToken(claims)
+//            val username = getUsername(claims)
+//            if (username != null) {
+//                println(username)
+//                val authorities = listOf<GrantedAuthority>(SimpleGrantedAuthority("ROLE_USER"))
+//                return JwtAuthenticator(authorities, null, claims)
+//            }
+//        }
+//        return null
+//    }
 
     private fun getUsername(claims: JWTClaimsSet?): String? {
         if (claims != null) {
