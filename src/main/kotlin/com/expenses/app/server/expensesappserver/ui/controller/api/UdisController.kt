@@ -28,8 +28,9 @@ class UdisController(
     }
 
     @GetMapping("/udis/{id}", produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun getUdiById(@PathVariable(value = "id") id: Long): ResponseRetirementRecord {
-        return udiRepository.getUdiById(id)
+    fun getUdiById(@PathVariable(value = "id") id: Long, @RequestBody body: String): ResponseRetirementRecord {
+        val userId = mapper.readValue(body, RetirementRecordGet::class.java)
+        return udiRepository.getUdiById(id = id, userId = userId.userId)
     }
 
     @PostMapping("/udis", produces = [MediaType.APPLICATION_JSON_VALUE])

@@ -10,3 +10,6 @@ data class EntityNotFoundException(val status: Status, val customMessage: String
 
 @ResponseStatus(value = HttpStatus.BAD_REQUEST)
 class BadRequestException(message: String): RuntimeException(message)
+
+@ResponseStatus(value = HttpStatus.UNAUTHORIZED)
+data class UnauthorizedException(val status: Status, val customMessage: String): RuntimeException(customMessage)

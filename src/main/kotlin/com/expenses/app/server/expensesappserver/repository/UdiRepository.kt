@@ -1,6 +1,7 @@
 package com.expenses.app.server.expensesappserver.repository
 
 import com.expenses.app.server.expensesappserver.common.exceptions.EntityNotFoundException
+import com.expenses.app.server.expensesappserver.common.exceptions.UnauthorizedException
 import com.expenses.app.server.expensesappserver.common.responses.Status
 import com.expenses.app.server.expensesappserver.ui.database.entities.*
 import org.jetbrains.exposed.sql.*
@@ -13,9 +14,9 @@ class UdiRepository {
     val retirementRecordCrudTable = RetirementRecordEntity
     val udiEntityCrudTable = UdiEntity
 
-    //TODO implement logic to check if the row belongs to the user id
-    fun getUdiById(id: Long): ResponseRetirementRecord {
+    fun getUdiById(id: Long, userId: String): ResponseRetirementRecord {
         val retirementRecord = findUdiById(id)
+        validateOwnership (retirementRecord.userId, userId)
         val commissions = findCommissionById(retirementRecord.userId)
         val udiconversions =
             calculateCommissions(commissions.userUdis, commissions.UdiCommssion, retirementRecord.udiValue)
@@ -134,18 +135,12 @@ class UdiRepository {
             id = userId
         )
 
-//    fun findCommissionById(id: Int) =
-//        transaction {
-//            udiEntityCrudTable.find { UdiEntityTable.id eq id }.limit(1).firstOrNull()?.toUdiEntity()
-//        }
-
-    //fun findAll(id: String): List<RetirementRecord> = crudTable.select{ RetirementEntity.userId eq id }.map { it.toRetirementRecord() }
-
-    //operator fun get(id: Long): RetirementRecord? =
-    //  findOneById(id) ?: throw EntityNotFoundException("Record with id $id not found")
-
-    //fun findOneById(id: Long) =
-    //  crudTable.select { RetirementEntity.id eq id }.limit(1).map { it.toRetirementRecord() }.firstOrNull()
+    private fun validateOwnership(userId: String, bodyUserId: String ) {
+        if (userId != bodyUserId) throw UnauthorizedException(
+            status = Status.UNAUTHORIZED,
+            customMessage = "The user doesnt own this data"
+        )
+    }
 
     private fun calculateCommissions(userUdis: Double, udiCommission: Double, udiValue: Double): UdiConversions {
         return UdiConversions(

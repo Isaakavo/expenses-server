@@ -1,6 +1,7 @@
 package com.expenses.app.server.expensesappserver
 
 import com.expenses.app.server.expensesappserver.common.exceptions.EntityNotFoundException
+import com.expenses.app.server.expensesappserver.common.exceptions.UnauthorizedException
 import com.expenses.app.server.expensesappserver.common.responses.BodyResponse
 import com.expenses.app.server.expensesappserver.common.responses.ErrorResponse
 import org.springframework.http.HttpStatus
@@ -16,6 +17,14 @@ class CustomErrorAdvice {
         return ResponseEntity(
             ErrorResponse(status = ex.status, BodyResponse(userId = ex.id, message = ex.customMessage)),
             HttpStatus.NOT_FOUND
+        )
+    }
+
+    @ExceptionHandler(UnauthorizedException::class)
+    fun handleUnauthorizedException(ex: UnauthorizedException): ResponseEntity<Any> {
+        return ResponseEntity(
+            ErrorResponse(status = ex.status, BodyResponse(message = ex.customMessage)),
+            HttpStatus.UNAUTHORIZED
         )
     }
 
