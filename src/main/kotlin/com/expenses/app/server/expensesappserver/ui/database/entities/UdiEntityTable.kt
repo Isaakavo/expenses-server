@@ -7,7 +7,7 @@ import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.Column
 
-object UdiEntityTable: IntIdTable("udis_commisions") {
+object UdiEntityTable: IntIdTable("udi_commissions") {
     val userId: Column<String> = varchar("user_id", 50)
     val userUdis: Column<Double> = double("user_udis")
     val udiCommission: Column<Double> = double("udi_commission")

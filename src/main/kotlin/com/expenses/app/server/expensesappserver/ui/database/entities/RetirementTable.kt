@@ -10,7 +10,7 @@ import org.jetbrains.exposed.sql.javatime.datetime
 import java.time.LocalDateTime
 
 
-object RetirementTable : LongIdTable("udis_table") {
+object RetirementTable : LongIdTable("udi") {
     val userId: Column<String> = varchar("user_id", 50)
     val purchaseTotal: Column<Double> = double("purchase_total")
     val dateOfPurchase: Column<LocalDateTime> = datetime("date_purchase")
