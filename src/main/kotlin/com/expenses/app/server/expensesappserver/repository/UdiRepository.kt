@@ -17,11 +17,10 @@ class UdiRepository(
     val retirementRecordCrudTable = RetirementRecordEntity
     val udiEntityCrudTable = UdiEntity
 
-    //TODO replace all userId for userId from context
-    fun getUdiById(id: Long, userId: String): ResponseRetirementRecord {
+    fun getUdiById(id: Long): ResponseRetirementRecord {
         val retirementRecord = findUdiById(id)
-        validateOwnership(retirementRecord.userId, userId)
-        val commissions = validatedCommissionById(retirementRecord.userId)
+        validateOwnership(retirementRecord.userId)
+        val commissions = validatedCommissionById()
         val udiconversions =
             calculateCommissions(commissions.userUdis, commissions.UdiCommssion, retirementRecord.udiValue)
         return ResponseRetirementRecord(
@@ -33,11 +32,16 @@ class UdiRepository(
 
     fun getAllUdi(): List<ResponseRetirementRecord>? {
         val userId = authenticationFacade.userId()
-        val commission = validatedCommissionById(userId)
+        val commission = validatedCommissionById()
         val retirementData = transaction {
             addLogger(StdOutSqlLogger)
             retirementRecordCrudTable.find { RetirementTable.userId eq userId }.map { it.toRetirementRecord() }
         }
+        if (retirementData.isEmpty()) throw EntityNotFoundException(
+            status = Status.NO_DATA,
+            customMessage = "This user doesnt have data",
+            id = userId
+        )
         val udiResponseList = mutableListOf<ResponseRetirementRecord>()
         retirementData.forEach { value ->
             val udiConversion = calculateCommissions(
@@ -57,12 +61,13 @@ class UdiRepository(
     }
 
     fun insertUdi(retirementRecord: RetirementRecordPost): ResponseRetirementRecord {
-        val commissions = validatedCommissionById(retirementRecord.userId)
+        val userIdName = authenticationFacade.userId()
+        val commissions = validatedCommissionById()
         val result = transaction {
             addLogger(StdOutSqlLogger)
             retirementRecordCrudTable
                 .new {
-                    userId = retirementRecord.userId
+                    userId = userIdName
                     purchaseTotal = retirementRecord.purchaseTotal
                     dateOfPurchase = retirementRecord.dateOfPurchase
                     udiValue = retirementRecord.udiValue
@@ -79,7 +84,8 @@ class UdiRepository(
 
     fun updateUdi(id: Long, retirementRecordPost: RetirementRecordPost): ResponseRetirementRecord {
         val retirementRecord = findUdiById(id)
-        val commissions = validatedCommissionById(retirementRecord.userId)
+        validateOwnership(retirementRecord.userId)
+        val commissions = validatedCommissionById()
         transaction {
             addLogger(StdOutSqlLogger)
             retirementRecordCrudTable
@@ -101,6 +107,7 @@ class UdiRepository(
 
     fun deleteUdi(id: Long): ResponseRetirementRecord {
         val singleRetirementRecord = findUdiById(id)
+        validateOwnership(singleRetirementRecord.userId)
         transaction {
             retirementRecordCrudTable.table.deleteWhere { RetirementTable.id eq id }
         }
@@ -110,29 +117,29 @@ class UdiRepository(
     fun insertCommission(udiCommissionPost: UdiCommissionPost): UdiCommission {
         transaction {
             udiEntityCrudTable.new {
-                userId = udiCommissionPost.userId
+                userId = authenticationFacade.userId()
                 userUdis = udiCommissionPost.userUdis
                 udiCommision = udiCommissionPost.UdiCommssion
             }
         }
-        return validatedCommissionById(udiCommissionPost.userId)
+        return validatedCommissionById()
     }
 
 
     fun updateCommission(udiCommissionPost: UdiCommissionPost): UdiCommission {
-        return when (findCommissionById(udiCommissionPost.userId)) {
+        return when (findCommissionById()) {
             null -> {
                 insertCommission(udiCommissionPost)
             }
 
             else -> {
                 transaction {
-                    udiEntityCrudTable.table.update({ UdiEntityTable.userId eq udiCommissionPost.userId }) {
+                    udiEntityCrudTable.table.update({ UdiEntityTable.userId eq authenticationFacade.userId() }) {
                         it[UdiEntityTable.udiCommission] = udiCommissionPost.UdiCommssion
                         it[UdiEntityTable.userUdis] = udiCommissionPost.userUdis
                     }
                 }
-                validatedCommissionById(udiCommissionPost.userId)
+                validatedCommissionById()
             }
         }
     }
@@ -146,19 +153,20 @@ class UdiRepository(
         id = id.toString()
     )
 
-    fun validatedCommissionById(userId: String) = findCommissionById(userId) ?: throw EntityNotFoundException(
+    fun validatedCommissionById() = findCommissionById() ?: throw EntityNotFoundException(
         status = Status.NO_COMMISSION_DATA,
         customMessage = "No data for this user",
-        id = userId
+        id = authenticationFacade.userId()
     )
 
-    fun findCommissionById(userId: String) =
+    private fun findCommissionById() =
         transaction {
-            udiEntityCrudTable.find { UdiEntityTable.userId eq userId }.limit(1).firstOrNull()?.toUdiEntity()
+            udiEntityCrudTable.find { UdiEntityTable.userId eq authenticationFacade.userId() }.limit(1).firstOrNull()
+                ?.toUdiEntity()
         }
 
-    private fun validateOwnership(userId: String, bodyUserId: String) {
-        if (userId != bodyUserId) throw UnauthorizedException(
+    private fun validateOwnership(userId: String) {
+        if (userId != authenticationFacade.userId()) throw UnauthorizedException(
             status = Status.UNAUTHORIZED,
             customMessage = "The user doesnt own this data"
         )
@@ -171,5 +179,3 @@ class UdiRepository(
         )
     }
 }
-
-//private fun ResultRow.toRetirementRecord() = RetirementEntity.rowToRetirementRecord(this)

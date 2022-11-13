@@ -25,13 +25,8 @@ data class RetirementRecord(
     val dateOfPurchase: LocalDateTime,
     val udiValue: Double,
 )
-//TODO move this data classes to another file where all the request classes will live
-data class RetirementRecordGet(
-    val userId: String
-)
 
 data class RetirementRecordPost(
-    val userId: String,
     val purchaseTotal: Double,
     val dateOfPurchase: LocalDateTime,
     val udiValue: Double,
@@ -53,7 +48,6 @@ data class UdiConversions(
 ): LongEntity(id) {
      companion object: LongEntityClass<RetirementRecordEntity>(RetirementTable)
 
-     //var id by RetirementEntity.id
      var userId by RetirementTable.userId
      var purchaseTotal by RetirementTable.purchaseTotal
      var dateOfPurchase by RetirementTable.dateOfPurchase
@@ -67,11 +61,3 @@ data class UdiConversions(
          udiValue
      )
  }
-
-//fun RetirementEntity.rowToRetirementRecord(row: ResultRow): RetirementRecord = RetirementRecord(
-//    //id = row[RetirementEntity.id].value,
-//    userId = row[userId],
-//    purchaseTotal = row[purchaseTotal],
-//    dateOfPurchase = row[dateOfPurchase],
-//    udiValue = row[udiValue]
-//    )

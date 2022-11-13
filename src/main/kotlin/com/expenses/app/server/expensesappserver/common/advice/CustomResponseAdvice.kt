@@ -48,7 +48,6 @@ class CustomResponseAdvice : ResponseBodyAdvice<Any> {
                 }
             }
             is ResponseRetirementRecord -> {
-                //response.setStatusCode(HttpStatus.OK)
                 return ApiResponse(
                     Status.SUCCESS,
                     BodyResponse(userId = body.udiCommission?.userId, message = "", size = 1, data = listOf(body))

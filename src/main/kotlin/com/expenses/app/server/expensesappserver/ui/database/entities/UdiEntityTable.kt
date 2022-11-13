@@ -21,7 +21,6 @@ data class UdiCommission(
 )
 
 data class UdiCommissionPost(
-    val userId: String,
     val userUdis: Double,
     val UdiCommssion: Double
 )

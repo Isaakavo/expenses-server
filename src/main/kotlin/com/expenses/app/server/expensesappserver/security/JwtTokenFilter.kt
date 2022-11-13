@@ -50,21 +50,6 @@ class JwtTokenFilter: OncePerRequestFilter() {
         filterChain.doFilter(request, response)
     }
 
-    //TODO refactor to extract username and check how to implement this correctly
-//    fun authentication(request: HttpServletRequest): Authentication? {
-//        request.getHeader(AUTHORIZATION)?.let { token ->
-//            val claims = configurableJWTProcessor?.process(getToken(token), null)
-//            validateToken(claims)
-//            val username = getUsername(claims)
-//            if (username != null) {
-//                println(username)
-//                val authorities = listOf<GrantedAuthority>(SimpleGrantedAuthority("ROLE_USER"))
-//                return JwtAuthenticator(authorities, null, claims)
-//            }
-//        }
-//        return null
-//    }
-
     private fun getUsername(claims: JWTClaimsSet?): String? {
         if (claims != null) {
             return claims.getClaim(USERNAME_FIELD).toString()
