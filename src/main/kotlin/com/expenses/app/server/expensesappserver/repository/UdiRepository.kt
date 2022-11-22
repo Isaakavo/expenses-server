@@ -24,12 +24,15 @@ class UdiRepository(
         val udiconversions =
             calculateCommissions(commissions.userUdis, commissions.UdiCommssion, retirementRecord.udiValue)
         return ResponseRetirementRecord(
+            retirementRecord.id,
             retirementRecord,
             commissions,
             udiconversions
         )
     }
 
+    //TODO change response schema to only return the list of retirement records and conversion as a list and commissions
+    // as objects in the response
     fun getAllUdi(): List<ResponseRetirementRecord>? {
         val userId = authenticationFacade.userId()
         val commission = validatedCommissionById()
@@ -51,6 +54,7 @@ class UdiRepository(
             )
             udiResponseList.add(
                 ResponseRetirementRecord(
+                    value.id,
                     value,
                     commission, udiConversion
                 )
@@ -76,6 +80,7 @@ class UdiRepository(
         val udiconversions =
             calculateCommissions(commissions.userUdis, commissions.UdiCommssion, result.udiValue)
         return ResponseRetirementRecord(
+            result.id,
             result,
             commissions,
             udiconversions
@@ -99,6 +104,7 @@ class UdiRepository(
             calculateCommissions(commissions.userUdis, commissions.UdiCommssion, retirementRecordPost.udiValue)
         val newRetirementRecord = findUdiById(id)
         return ResponseRetirementRecord(
+            retirementRecord.id,
             newRetirementRecord,
             commissions,
             udiconversions
@@ -111,7 +117,7 @@ class UdiRepository(
         transaction {
             retirementRecordCrudTable.table.deleteWhere { RetirementTable.id eq id }
         }
-        return ResponseRetirementRecord(singleRetirementRecord)
+        return ResponseRetirementRecord(singleRetirementRecord.id, singleRetirementRecord)
     }
 
     fun insertCommission(udiCommissionPost: UdiCommissionPost): UdiCommission {
