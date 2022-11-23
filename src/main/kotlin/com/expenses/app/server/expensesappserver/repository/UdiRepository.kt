@@ -40,11 +40,9 @@ class UdiRepository(
             addLogger(StdOutSqlLogger)
             retirementRecordCrudTable.find { RetirementTable.userId eq userId }.map { it.toRetirementRecord() }
         }
-        if (retirementData.isEmpty()) throw EntityNotFoundException(
-            status = Status.NO_DATA,
-            customMessage = "This user doesnt have data",
-            id = userId
-        )
+
+        if (retirementData.isEmpty()) return emptyList()
+
         val udiResponseList = mutableListOf<ResponseRetirementRecord>()
         retirementData.forEach { value ->
             val udiConversion = calculateCommissions(

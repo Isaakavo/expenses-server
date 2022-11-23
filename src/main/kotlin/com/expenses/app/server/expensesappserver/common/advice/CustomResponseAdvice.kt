@@ -32,6 +32,13 @@ class CustomResponseAdvice : ResponseBodyAdvice<Any> {
 
         when (body) {
             is List<*> -> {
+                if (body.isEmpty()) return ApiResponse(
+                    Status.NO_DATA,
+                    BodyResponse(
+                        message = "No data for this user",
+                        size = 0,
+                    )
+                )
                 val objType = body[0]
                 if (objType is ResponseRetirementRecord) {
                     response.setStatusCode(HttpStatus.OK)
