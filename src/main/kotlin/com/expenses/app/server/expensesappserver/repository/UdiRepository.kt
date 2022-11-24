@@ -60,6 +60,7 @@ class UdiRepository(
     fun insertUdi(retirementRecord: RetirementRecordPost): ResponseRetirementRecord {
         val userIdName = authenticationFacade.userId()
         val mostRecentCommission = getMostRecentCommission()
+        val totalOfUdiCalculation = retirementRecord.purchaseTotal / retirementRecord.udiValue
         val result = transaction {
             addLogger(StdOutSqlLogger)
             retirementRecordCrudTable
@@ -67,10 +68,11 @@ class UdiRepository(
                     userId = userIdName
                     udiCommission = mostRecentCommission
                     purchaseTotal = retirementRecord.purchaseTotal
+                    totalOfUdi = totalOfUdiCalculation
                     dateOfPurchase = retirementRecord.dateOfPurchase
                     udiValue = retirementRecord.udiValue
-                }
-        }.toRetirementRecord()
+                }.toRetirementRecord()
+        }
 
         val rawCommissionUdi = mostRecentCommission.toUdiEntity()
         val udiconversions =
@@ -86,6 +88,7 @@ class UdiRepository(
         val retirementRecord = findUdiById(id)
         // val commissions = validatedCommissionById()
         val commission = retirementRecord.udiCommission
+        val totalOfUdiCalculation = retirementRecord.purchaseTotal / retirementRecord.udiValue
         transaction {
             addLogger(StdOutSqlLogger)
             retirementRecordCrudTable
@@ -93,6 +96,7 @@ class UdiRepository(
                     it[RetirementTable.udiValue] = retirementRecordPost.udiValue
                     it[RetirementTable.dateOfPurchase] = retirementRecordPost.dateOfPurchase
                     it[RetirementTable.purchaseTotal] = retirementRecordPost.purchaseTotal
+                    it[RetirementTable.totalOfUdi] = totalOfUdiCalculation
                 }
         }
         val udiconversions =
@@ -188,7 +192,7 @@ class UdiRepository(
     private fun calculateCommissions(userUdis: Double, udiCommission: Double, udiValue: Double): UdiConversions {
         return UdiConversions(
             udiConversion = userUdis * udiValue,
-            udiCommissionConversion = udiValue * udiCommission
+            udiCommissionConversion = udiValue * udiCommission,
         )
     }
 }

@@ -15,8 +15,9 @@ data class RetirementRecord(
     @JsonIgnore
     val userId: String,
     val purchaseTotal: Double,
-    val dateOfPurchase: LocalDateTime,
     val udiValue: Double,
+    val totalOfUdi: Double,
+    val dateOfPurchase: LocalDateTime,
     val udiCommission: UdiCommission,
 )
 
@@ -35,13 +36,14 @@ data class ResponseRetirementRecord(
 
 data class UdiConversions(
     val udiConversion: Double,
-    val udiCommissionConversion: Double
+    val udiCommissionConversion: Double,
 )
 
 object RetirementTable : IntIdTable("udi") {
     val userId: Column<String> = varchar("user_id", 50)
     val udiCommission = reference("udi_commission", UdiEntityTable, onDelete = ReferenceOption.CASCADE)
     val purchaseTotal: Column<Double> = double("purchase_total")
+    val totalOfUdi: Column<Double> = double("total_udi")
     val dateOfPurchase: Column<LocalDateTime> = datetime("date_purchase")
     val udiValue: Column<Double> = double("udi_value")
 }
@@ -54,6 +56,7 @@ class RetirementRecordEntity(
     var userId by RetirementTable.userId
     var udiCommission by UdiEntity referencedOn RetirementTable.udiCommission
     var purchaseTotal by RetirementTable.purchaseTotal
+    var totalOfUdi by RetirementTable.totalOfUdi
     var dateOfPurchase by RetirementTable.dateOfPurchase
     var udiValue by RetirementTable.udiValue
 
@@ -61,8 +64,9 @@ class RetirementRecordEntity(
         id.value,
         userId,
         purchaseTotal,
-        dateOfPurchase,
         udiValue,
+        totalOfUdi,
+        dateOfPurchase,
         udiCommission.toUdiEntity(),
     )
 }
