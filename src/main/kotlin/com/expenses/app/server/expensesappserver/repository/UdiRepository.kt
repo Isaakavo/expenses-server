@@ -28,8 +28,6 @@ class UdiRepository(
         )
     }
 
-    //TODO change response schema to only return the list of retirement records and conversion as a list and commissions
-    // as objects in the response
     fun getAllUdi(): List<ResponseRetirementRecord>? {
         val userId = authenticationFacade.userId()
         val retirementData = transaction {
