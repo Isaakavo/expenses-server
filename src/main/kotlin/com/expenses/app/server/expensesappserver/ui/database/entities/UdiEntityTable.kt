@@ -10,6 +10,7 @@ import org.jetbrains.exposed.sql.javatime.datetime
 import java.time.LocalDateTime
 
 data class UdiCommission(
+    val id: Int,
     @JsonIgnore
     val userId: String?,
     val userUdis: Double,
@@ -39,6 +40,7 @@ class UdiEntity(id: EntityID<Int>): IntEntity(id) {
     var dateAdded by UdiEntityTable.dateAdded
 
     fun toUdiEntity() = UdiCommission(
+        id.value,
         userId,
         userUdis,
         udiCommision,

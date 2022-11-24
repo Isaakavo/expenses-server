@@ -117,6 +117,17 @@ class UdiRepository(
         return ResponseRetirementRecord(singleRetirementRecord.id, singleRetirementRecord)
     }
 
+    fun getCommissions(): List<UdiCommission> {
+        val commissions = transaction {
+            udiEntityCrudTable.find { UdiEntityTable.userId eq authenticationFacade.userId() }
+                .map {
+                    it.toUdiEntity()
+                }
+        }
+
+        return commissions
+    }
+
     fun insertCommission(udiCommissionPost: UdiCommissionPost): UdiCommission {
         val recentAddedCommission = transaction {
             udiEntityCrudTable.new {

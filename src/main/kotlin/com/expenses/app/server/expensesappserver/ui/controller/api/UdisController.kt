@@ -46,7 +46,7 @@ class UdisController(
 
 
     @GetMapping("/udis/commission", produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun getCommission(): UdiCommission = udiRepository.validatedCommissionById()
+    fun getCommission(): List<UdiCommission> = udiRepository.getCommissions()
 
 
     @PostMapping("/udis/commission", produces = [MediaType.APPLICATION_JSON_VALUE])
