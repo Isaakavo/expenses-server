@@ -26,7 +26,7 @@ class UdisController(
 
 
     @GetMapping("/udis/{id}", produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun getUdiById(@PathVariable(value = "id") id: Long): ResponseRetirementRecord = udiRepository.getUdiById(id = id)
+    fun getUdiById(@PathVariable(value = "id") id: Int): ResponseRetirementRecord = udiRepository.getUdiById(id = id)
 
 
     @PostMapping("/udis", produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -36,13 +36,13 @@ class UdisController(
     }
 
     @PutMapping("/udis/{id}", produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun updateUdi(@PathVariable(value = "id") id: Long, @RequestBody body: String): ResponseRetirementRecord {
+    fun updateUdi(@PathVariable(value = "id") id: Int, @RequestBody body: String): ResponseRetirementRecord {
         val data = mapper.readValue<RetirementRecordPost>(body, RetirementRecordPost::class.java)
         return udiRepository.updateUdi(id, data)
     }
 
     @DeleteMapping("/udis/{id}", produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun deleteUdi(@PathVariable(value = "id") id: Long): ResponseRetirementRecord = udiRepository.deleteUdi(id)
+    fun deleteUdi(@PathVariable(value = "id") id: Int): ResponseRetirementRecord = udiRepository.deleteUdi(id)
 
 
     @GetMapping("/udis/commission", produces = [MediaType.APPLICATION_JSON_VALUE])

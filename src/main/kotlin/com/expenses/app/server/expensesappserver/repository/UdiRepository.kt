@@ -17,7 +17,7 @@ class UdiRepository(
     val retirementRecordCrudTable = RetirementRecordEntity
     val udiEntityCrudTable = UdiEntity
 
-    fun getUdiById(id: Long): ResponseRetirementRecord {
+    fun getUdiById(id: Int): ResponseRetirementRecord {
         val retirementRecord = findUdiById(id)
         validateOwnership(retirementRecord.userId)
         val commissions = validatedCommissionById()
@@ -85,7 +85,7 @@ class UdiRepository(
         )
     }
 
-    fun updateUdi(id: Long, retirementRecordPost: RetirementRecordPost): ResponseRetirementRecord {
+    fun updateUdi(id: Int, retirementRecordPost: RetirementRecordPost): ResponseRetirementRecord {
         val retirementRecord = findUdiById(id)
         validateOwnership(retirementRecord.userId)
         val commissions = validatedCommissionById()
@@ -109,7 +109,7 @@ class UdiRepository(
         )
     }
 
-    fun deleteUdi(id: Long): ResponseRetirementRecord {
+    fun deleteUdi(id: Int): ResponseRetirementRecord {
         val singleRetirementRecord = findUdiById(id)
         validateOwnership(singleRetirementRecord.userId)
         transaction {
@@ -149,7 +149,7 @@ class UdiRepository(
     }
 
 
-    fun findUdiById(id: Long) = transaction {
+    fun findUdiById(id: Int) = transaction {
         retirementRecordCrudTable.find { RetirementTable.id eq id }.limit(1).firstOrNull()?.toRetirementRecord()
     } ?: throw EntityNotFoundException(
         status = Status.NO_DATA,

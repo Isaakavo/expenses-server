@@ -7,12 +7,6 @@ import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.Column
 
-object UdiEntityTable: IntIdTable("udi_commissions") {
-    val userId: Column<String> = varchar("user_id", 50)
-    val userUdis: Column<Double> = double("user_udis")
-    val udiCommission: Column<Double> = double("udi_commission")
-}
-
 data class UdiCommission(
     @JsonIgnore
     val userId: String?,
@@ -24,6 +18,12 @@ data class UdiCommissionPost(
     val userUdis: Double,
     val UdiCommssion: Double
 )
+
+object UdiEntityTable: IntIdTable("udi_commissions") {
+    val userId: Column<String> = varchar("user_id", 50)
+    val userUdis: Column<Double> = double("user_udis")
+    val udiCommission: Column<Double> = double("udi_commission")
+}
 
 class UdiEntity(id: EntityID<Int>): IntEntity(id) {
     companion object: IntEntityClass<UdiEntity>(UdiEntityTable)

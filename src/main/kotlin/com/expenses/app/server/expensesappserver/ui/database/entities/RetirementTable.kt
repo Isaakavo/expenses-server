@@ -1,24 +1,19 @@
 package com.expenses.app.server.expensesappserver.ui.database.entities
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import org.jetbrains.exposed.dao.IntEntity
+import org.jetbrains.exposed.dao.IntEntityClass
 import org.jetbrains.exposed.dao.LongEntity
 import org.jetbrains.exposed.dao.LongEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
+import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.dao.id.LongIdTable
 import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.javatime.datetime
 import java.time.LocalDateTime
 
-
-object RetirementTable : LongIdTable("udi") {
-    val userId: Column<String> = varchar("user_id", 50)
-    val purchaseTotal: Column<Double> = double("purchase_total")
-    val dateOfPurchase: Column<LocalDateTime> = datetime("date_purchase")
-    val udiValue: Column<Double> = double("udi_value")
-}
-
 data class RetirementRecord(
-    var id: Long? = null,
+    var id: Int? = null,
     @JsonIgnore
     val userId: String,
     val purchaseTotal: Double,
@@ -33,7 +28,7 @@ data class RetirementRecordPost(
 )
 
 data class ResponseRetirementRecord(
-    val id: Long?,
+    val id: Int?,
     val retirementRecord: RetirementRecord? = null,
     val udiCommission: UdiCommission? = null,
     val udiConversions: UdiConversions? = null
@@ -44,10 +39,17 @@ data class UdiConversions(
     val udiCommissionConversion: Double
 )
 
+object RetirementTable : IntIdTable("udi") {
+    val userId: Column<String> = varchar("user_id", 50)
+    val purchaseTotal: Column<Double> = double("purchase_total")
+    val dateOfPurchase: Column<LocalDateTime> = datetime("date_purchase")
+    val udiValue: Column<Double> = double("udi_value")
+}
+
  class RetirementRecordEntity(
-    id: EntityID<Long>
-): LongEntity(id) {
-     companion object: LongEntityClass<RetirementRecordEntity>(RetirementTable)
+    id: EntityID<Int>
+): IntEntity(id) {
+     companion object: IntEntityClass<RetirementRecordEntity>(RetirementTable)
 
      var userId by RetirementTable.userId
      var purchaseTotal by RetirementTable.purchaseTotal
