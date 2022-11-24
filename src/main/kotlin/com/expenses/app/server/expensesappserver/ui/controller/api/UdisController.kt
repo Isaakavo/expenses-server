@@ -52,7 +52,7 @@ class UdisController(
     @PostMapping("/udis/commission", produces = [MediaType.APPLICATION_JSON_VALUE])
     fun insertCommission(@RequestBody body: String): UdiCommission {
         val data = mapper.readValue<UdiCommissionPost>(body, UdiCommissionPost::class.java)
-        return udiRepository.updateCommission(data)
+        return udiRepository.insertCommission(data)
     }
 
     @PutMapping("/udis/commission", produces = [MediaType.APPLICATION_JSON_VALUE])

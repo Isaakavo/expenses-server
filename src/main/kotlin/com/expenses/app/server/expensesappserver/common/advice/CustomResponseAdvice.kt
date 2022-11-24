@@ -45,7 +45,7 @@ class CustomResponseAdvice : ResponseBodyAdvice<Any> {
                     return ApiResponse(
                         Status.SUCCESS,
                         BodyResponse(
-                            userId = objType.udiCommission?.userId,
+                            userId = objType.retirementRecord?.userId,
                             message = "",
                             size = body.size,
                             data = body
@@ -57,7 +57,7 @@ class CustomResponseAdvice : ResponseBodyAdvice<Any> {
             is ResponseRetirementRecord -> {
                 return ApiResponse(
                     Status.SUCCESS,
-                    BodyResponse(userId = body.udiCommission?.userId, message = "", size = 1, data = listOf(body))
+                    BodyResponse(userId = body.retirementRecord?.userId, message = "", size = 1, data = listOf(body))
                 )
             }
             is UdiCommission -> {
