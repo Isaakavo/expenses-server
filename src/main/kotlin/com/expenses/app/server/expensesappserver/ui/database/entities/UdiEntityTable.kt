@@ -19,6 +19,7 @@ data class UdiCommission(
 )
 
 data class UdiCommissionPost(
+    val id : Int,
     val userUdis: Double,
     val UdiCommssion: Double,
     val dateAdded: LocalDateTime

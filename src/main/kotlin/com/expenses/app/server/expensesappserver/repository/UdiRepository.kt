@@ -86,7 +86,6 @@ class UdiRepository(
 
     fun updateUdi(id: Int, retirementRecordPost: RetirementRecordPost): ResponseRetirementRecord {
         val retirementRecord = findUdiById(id)
-        // val commissions = validatedCommissionById()
         val commission = retirementRecord.udiCommission
         val totalOfUdiCalculation = retirementRecord.purchaseTotal / retirementRecord.udiValue
         transaction {
@@ -142,21 +141,13 @@ class UdiRepository(
 
 
     fun updateCommission(udiCommissionPost: UdiCommissionPost): UdiCommission {
-        return when (findCommissionById()) {
-            null -> {
-                insertCommission(udiCommissionPost)
-            }
-
-            else -> {
-                transaction {
-                    udiEntityCrudTable.table.update({ UdiEntityTable.userId eq authenticationFacade.userId() }) {
-                        it[UdiEntityTable.udiCommission] = udiCommissionPost.UdiCommssion
-                        it[UdiEntityTable.userUdis] = udiCommissionPost.userUdis
-                    }
-                }
-                validatedCommissionById()
+        val updatedCommissionId = transaction {
+            udiEntityCrudTable.table.update({ UdiEntityTable.userId eq authenticationFacade.userId() and (UdiEntityTable.id eq udiCommissionPost.id) }) {
+                it[UdiEntityTable.udiCommission] = udiCommissionPost.UdiCommssion
+                it[UdiEntityTable.userUdis] = udiCommissionPost.userUdis
             }
         }
+        return finCommissionById(updatedCommissionId)
     }
 
 
@@ -166,27 +157,15 @@ class UdiRepository(
     } ?: throw EntityNotFoundException(
         status = Status.NO_DATA,
         customMessage = "This udi id doesnt exists",
-        id = id.toString()
-    )
-
-    fun validatedCommissionById() = findCommissionById() ?: throw EntityNotFoundException(
-        status = Status.NO_COMMISSION_DATA,
-        customMessage = "No data for this user",
         id = authenticationFacade.userId()
     )
-
-    private fun findCommissionById() =
-        transaction {
-            udiEntityCrudTable.find { UdiEntityTable.userId eq authenticationFacade.userId() }.limit(1).firstOrNull()
-                ?.toUdiEntity()
-        }
 
     private fun getMostRecentCommission() = transaction {
         udiEntityCrudTable.find { UdiEntityTable.userId eq authenticationFacade.userId() }
             .orderBy(UdiEntityTable.dateAdded to SortOrder.DESC).limit(1).firstOrNull()
     } ?: throw EntityNotFoundException(
         status = Status.NO_DATA,
-        customMessage = "This udi id doesnt exists",
+        customMessage = "This user doesnt have a udi commission",
         id = authenticationFacade.userId()
     )
 
@@ -196,8 +175,8 @@ class UdiRepository(
             ?.toUdiEntity()
     } ?: throw EntityNotFoundException(
         status = Status.NO_DATA,
-        customMessage = "This udi id doesnt exists",
-        id = id.toString()
+        customMessage = "This user doesnt have a udi commission",
+        id = authenticationFacade.userId()
     )
 
     private fun calculateCommissions(userUdis: Double, udiCommission: Double, udiValue: Double): UdiConversions {

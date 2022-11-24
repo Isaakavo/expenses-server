@@ -16,7 +16,7 @@ class CustomErrorAdvice {
     fun handleNotFound(ex: EntityNotFoundException): ResponseEntity<Any> {
         return ResponseEntity(
             ErrorResponse(status = ex.status, BodyResponse(userId = ex.id, message = ex.customMessage)),
-            HttpStatus.NOT_FOUND
+            HttpStatus.OK
         )
     }
 
