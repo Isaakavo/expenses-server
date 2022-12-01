@@ -32,7 +32,9 @@ class UdiRepository(
         val userId = authenticationFacade.userId()
         val retirementData = transaction {
             addLogger(StdOutSqlLogger)
-            retirementRecordCrudTable.find { RetirementTable.userId eq userId }.map { it.toRetirementRecord() }
+            retirementRecordCrudTable.find { RetirementTable.userId eq userId }
+                .orderBy( RetirementTable.dateOfPurchase to SortOrder.DESC )
+                .map { it.toRetirementRecord() }
         }
 
         if (retirementData.isEmpty()) return emptyList()
