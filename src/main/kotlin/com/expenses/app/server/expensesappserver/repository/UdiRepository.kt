@@ -7,31 +7,40 @@ import com.expenses.app.server.expensesappserver.ui.database.entities.*
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Repository
 
 @Repository
 class UdiRepository(
     private val authenticationFacade: AuthenticationFacade
 ) {
+
+    companion object {
+        val logger: Logger = LoggerFactory.getLogger(UdiRepository::class.java)
+        const val INFO_MESSAGE = "Returning data for user"
+    }
+
     val retirementRecordCrudTable = RetirementRecordEntity
     val udiEntityCrudTable = UdiEntity
 
     fun getUdiById(id: Int): ResponseRetirementRecord {
         val retirementRecord = findUdiById(id)
         val commission = retirementRecord.udiCommission
-        val udiconversions =
+        val udiConversions =
             calculateCommissions(commission.userUdis, commission.UdiCommssion, retirementRecord.udiValue)
-        return ResponseRetirementRecord(
-            retirementRecord.id,
-            retirementRecord,
-            udiconversions
+        val response = ResponseRetirementRecord(
+                retirementRecord.id,
+                retirementRecord,
+                udiConversions
         )
+        logger.info("$INFO_MESSAGE $response")
+        return response
     }
 
     fun getAllUdi(): List<ResponseRetirementRecord>? {
         val userId = authenticationFacade.userId()
-        val retirementData = transaction {
-            addLogger(StdOutSqlLogger)
+        val retirementData = loggedTransaction {
             retirementRecordCrudTable.find { RetirementTable.userId eq userId }
                 .orderBy( RetirementTable.dateOfPurchase to SortOrder.DESC )
                 .map { it.toRetirementRecord() }
@@ -56,6 +65,7 @@ class UdiRepository(
 
             )
         }
+        logger.info("$INFO_MESSAGE $udiResponseList")
         return udiResponseList.toList()
     }
 
@@ -63,8 +73,7 @@ class UdiRepository(
         val userIdName = authenticationFacade.userId()
         val mostRecentCommission = getMostRecentCommission()
         val totalOfUdiCalculation = retirementRecord.purchaseTotal / retirementRecord.udiValue
-        val result = transaction {
-            addLogger(StdOutSqlLogger)
+        val result = loggedTransaction {
             retirementRecordCrudTable
                 .new {
                     userId = userIdName
@@ -79,19 +88,20 @@ class UdiRepository(
         val rawCommissionUdi = mostRecentCommission.toUdiEntity()
         val udiconversions =
             calculateCommissions(rawCommissionUdi.userUdis, rawCommissionUdi.UdiCommssion, result.udiValue)
-        return ResponseRetirementRecord(
-            result.id,
-            result,
-            udiconversions
+        val insertedValue = ResponseRetirementRecord(
+                result.id,
+                result,
+                udiconversions
         )
+        logger.info("$INFO_MESSAGE $insertedValue")
+        return insertedValue
     }
 
     fun updateUdi(id: Int, retirementRecordPost: RetirementRecordPost): ResponseRetirementRecord {
         val retirementRecord = findUdiById(id)
         val commission = retirementRecord.udiCommission
         val totalOfUdiCalculation = retirementRecord.purchaseTotal / retirementRecord.udiValue
-        transaction {
-            addLogger(StdOutSqlLogger)
+        loggedTransaction {
             retirementRecordCrudTable
                 .table.update({ RetirementTable.id eq id }) {
                     it[RetirementTable.udiValue] = retirementRecordPost.udiValue
@@ -103,35 +113,38 @@ class UdiRepository(
         val udiconversions =
             calculateCommissions(commission.userUdis, commission.UdiCommssion, retirementRecordPost.udiValue)
         val newRetirementRecord = findUdiById(id)
-        return ResponseRetirementRecord(
-            retirementRecord.id,
-            newRetirementRecord,
-            udiconversions
+        val updatedValue = ResponseRetirementRecord(
+                retirementRecord.id,
+                newRetirementRecord,
+                udiconversions
         )
+        logger.info("$INFO_MESSAGE $updatedValue")
+        return updatedValue
     }
 
     fun deleteUdi(id: Int): ResponseRetirementRecord {
         val singleRetirementRecord = findUdiById(id)
-        transaction {
+        loggedTransaction {
             retirementRecordCrudTable.table.deleteWhere { RetirementTable.id eq id }
         }
-        return ResponseRetirementRecord(singleRetirementRecord.id, singleRetirementRecord)
+        val deletedUdi = ResponseRetirementRecord(singleRetirementRecord.id, singleRetirementRecord)
+        logger.info("$INFO_MESSAGE $deletedUdi")
+        return deletedUdi
     }
 
     fun getCommissions(): List<UdiCommission> {
-        val commissions = transaction {
-            addLogger(StdOutSqlLogger)
+        val commissions = loggedTransaction {
             udiEntityCrudTable.find { UdiEntityTable.userId eq authenticationFacade.userId() }
                 .map {
                     it.toUdiEntity()
                 }
         }
-
+        logger.info("$INFO_MESSAGE $commissions")
         return commissions
     }
 
     fun insertCommission(udiCommissionPost: UdiCommissionPost): UdiCommission {
-        val recentAddedCommission = transaction {
+        val recentAddedCommission = loggedTransaction {
             udiEntityCrudTable.new {
                 userId = authenticationFacade.userId()
                 userUdis = udiCommissionPost.userUdis
@@ -139,22 +152,26 @@ class UdiRepository(
                 dateAdded = udiCommissionPost.dateAdded
             }
         }
-        return finCommissionById(recentAddedCommission.id.value)
+        val commission = finCommissionById(recentAddedCommission.id.value)
+        logger.info("$INFO_MESSAGE $commission")
+        return commission
     }
 
 
     fun updateCommission(udiCommissionPost: UdiCommissionPost): UdiCommission {
-        val updatedCommissionId = transaction {
+        val updatedCommissionId = loggedTransaction {
             udiEntityCrudTable.table.update({ UdiEntityTable.userId eq authenticationFacade.userId() and (UdiEntityTable.id eq udiCommissionPost.id) }) {
                 it[UdiEntityTable.udiCommission] = udiCommissionPost.udiCommission
                 it[UdiEntityTable.userUdis] = udiCommissionPost.userUdis
             }
         }
-        return finCommissionById(updatedCommissionId)
+        val commission = finCommissionById(updatedCommissionId)
+        logger.info("$INFO_MESSAGE $commission")
+        return commission
     }
 
 
-    fun findUdiById(id: Int) = transaction {
+    fun findUdiById(id: Int) = loggedTransaction {
         retirementRecordCrudTable.find { RetirementTable.id eq id and (RetirementTable.userId eq authenticationFacade.userId()) }
             .limit(1).firstOrNull()?.toRetirementRecord()
     } ?: throw EntityNotFoundException(
@@ -163,7 +180,7 @@ class UdiRepository(
         id = authenticationFacade.userId()
     )
 
-    private fun getMostRecentCommission() = transaction {
+    private fun getMostRecentCommission() = loggedTransaction {
         udiEntityCrudTable.find { UdiEntityTable.userId eq authenticationFacade.userId() }
             .orderBy(UdiEntityTable.dateAdded to SortOrder.DESC).limit(1).firstOrNull()
     } ?: throw EntityNotFoundException(
@@ -172,7 +189,7 @@ class UdiRepository(
         id = authenticationFacade.userId()
     )
 
-    private fun finCommissionById(id: Int) = transaction {
+    private fun finCommissionById(id: Int) = loggedTransaction {
         udiEntityCrudTable.find { UdiEntityTable.userId eq authenticationFacade.userId() and (UdiEntityTable.id eq id) }
             .limit(1).firstOrNull()
             ?.toUdiEntity()
@@ -187,5 +204,10 @@ class UdiRepository(
             udiConversion = userUdis * udiValue,
             udiCommissionConversion = udiValue * udiCommission,
         )
+    }
+
+    fun <T> loggedTransaction(statement: Transaction.() -> T): T = transaction {
+        addLogger(StdOutSqlLogger)
+        statement()
     }
 }
