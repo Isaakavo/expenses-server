@@ -19,10 +19,10 @@ data class UdiCommission(
 )
 
 data class UdiCommissionPost(
-    val id : Int,
-    val userUdis: Double,
-    val UdiCommssion: Double,
-    val dateAdded: LocalDateTime
+        val id : Int,
+        val userUdis: Double,
+        val udiCommission: Double,
+        val dateAdded: LocalDateTime
 )
 
 object UdiEntityTable: IntIdTable("udi_commissions") {

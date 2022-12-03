@@ -120,6 +120,7 @@ class UdiRepository(
 
     fun getCommissions(): List<UdiCommission> {
         val commissions = transaction {
+            addLogger(StdOutSqlLogger)
             udiEntityCrudTable.find { UdiEntityTable.userId eq authenticationFacade.userId() }
                 .map {
                     it.toUdiEntity()
@@ -134,7 +135,7 @@ class UdiRepository(
             udiEntityCrudTable.new {
                 userId = authenticationFacade.userId()
                 userUdis = udiCommissionPost.userUdis
-                udiCommision = udiCommissionPost.UdiCommssion
+                udiCommision = udiCommissionPost.udiCommission
                 dateAdded = udiCommissionPost.dateAdded
             }
         }
@@ -145,7 +146,7 @@ class UdiRepository(
     fun updateCommission(udiCommissionPost: UdiCommissionPost): UdiCommission {
         val updatedCommissionId = transaction {
             udiEntityCrudTable.table.update({ UdiEntityTable.userId eq authenticationFacade.userId() and (UdiEntityTable.id eq udiCommissionPost.id) }) {
-                it[UdiEntityTable.udiCommission] = udiCommissionPost.UdiCommssion
+                it[UdiEntityTable.udiCommission] = udiCommissionPost.udiCommission
                 it[UdiEntityTable.userUdis] = udiCommissionPost.userUdis
             }
         }

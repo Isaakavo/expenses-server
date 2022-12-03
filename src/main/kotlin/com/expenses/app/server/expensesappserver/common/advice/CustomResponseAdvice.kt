@@ -39,19 +39,31 @@ class CustomResponseAdvice : ResponseBodyAdvice<Any> {
                         size = 0,
                     )
                 )
-                val objType = body[0]
-                if (objType is ResponseRetirementRecord) {
-                    response.setStatusCode(HttpStatus.OK)
-                    return ApiResponse(
-                        Status.SUCCESS,
-                        BodyResponse(
-                            userId = objType.retirementRecord?.userId,
-                            message = "",
-                            size = body.size,
-                            data = body
+                when (val objType = body[0]) {
+                    is ResponseRetirementRecord -> {
+                        response.setStatusCode(HttpStatus.OK)
+                        return ApiResponse(
+                                Status.SUCCESS,
+                                BodyResponse(
+                                        userId = objType.retirementRecord?.userId,
+                                        message = "",
+                                        size = body.size,
+                                        data = body
+                                )
                         )
-                    )
-
+                    }
+                    is UdiCommission -> {
+                        response.setStatusCode(HttpStatus.OK)
+                        return ApiResponse(
+                                Status.SUCCESS,
+                                BodyResponse(
+                                        userId = objType.userId,
+                                        message = "",
+                                        size = body.size,
+                                        data = body
+                                )
+                        )
+                    }
                 }
             }
             is ResponseRetirementRecord -> {
