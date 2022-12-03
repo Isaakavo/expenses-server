@@ -180,6 +180,33 @@ class UdiRepository(
         id = authenticationFacade.userId()
     )
 
+    fun getGlobalDetails(udiValue: Double): UdiGlobalDetails {
+        val userIdName = authenticationFacade.userId()
+        val retirementList = getAllUdi()
+        var totalExpended = 0.0
+        var totalUdis = 0.0
+        var totalConversion = 0.0
+        var rendimiento = 0.0
+        retirementList?.map {
+            totalExpended += it.retirementRecord?.purchaseTotal ?: 0.0
+            totalUdis += it.retirementRecord?.totalOfUdi ?: 0.0
+        }
+        totalConversion = totalUdis * udiValue
+        rendimiento = totalConversion - totalExpended
+        val result = UdiGlobalDetails(
+                userId = userIdName,
+                totalExpend = totalExpended,
+                udisTotal = totalUdis,
+                udisConvertion = totalConversion,
+                rendimiento = rendimiento,
+                startDate = null,
+                endDate = null,
+                paymentDeadLine = null
+        )
+        logger.info("$INFO_MESSAGE $result")
+        return result
+    }
+
     private fun getMostRecentCommission() = loggedTransaction {
         udiEntityCrudTable.find { UdiEntityTable.userId eq authenticationFacade.userId() }
             .orderBy(UdiEntityTable.dateAdded to SortOrder.DESC).limit(1).firstOrNull()

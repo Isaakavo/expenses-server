@@ -5,6 +5,7 @@ import com.expenses.app.server.expensesappserver.common.responses.BodyResponse
 import com.expenses.app.server.expensesappserver.common.responses.Status
 import com.expenses.app.server.expensesappserver.ui.database.entities.ResponseRetirementRecord
 import com.expenses.app.server.expensesappserver.ui.database.entities.UdiCommission
+import com.expenses.app.server.expensesappserver.ui.database.entities.UdiGlobalDetails
 import org.springframework.core.MethodParameter
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -76,6 +77,19 @@ class CustomResponseAdvice : ResponseBodyAdvice<Any> {
                 return ApiResponse(
                     Status.SUCCESS,
                     BodyResponse(userId = body.userId, message = "", size = 1, listOf(body))
+                )
+            }
+
+            is UdiGlobalDetails -> {
+                response.setStatusCode(HttpStatus.OK)
+                return ApiResponse(
+                        Status.SUCCESS,
+                        BodyResponse(
+                                userId = body.userId,
+                                message = "",
+                                size = 1,
+                                data = listOf(body)
+                        )
                 )
             }
         }

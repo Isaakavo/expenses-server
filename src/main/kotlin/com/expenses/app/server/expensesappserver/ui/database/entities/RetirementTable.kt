@@ -39,6 +39,17 @@ data class UdiConversions(
     val udiCommissionConversion: Double,
 )
 
+data class UdiGlobalDetails(
+        val userId: String,
+        var totalExpend: Double = 0.0,
+        var udisTotal: Double = 0.0,
+        var udisConvertion: Double = 0.0,
+        var rendimiento: Double = 0.0,
+        var startDate: Long? = null,
+        var endDate: Long? = null,
+        var paymentDeadLine: Int? = null,
+)
+
 object RetirementTable : IntIdTable("udi") {
     val userId: Column<String> = varchar("user_id", 50)
     val udiCommission = reference("udi_commission", UdiEntityTable, onDelete = ReferenceOption.CASCADE)

@@ -4,6 +4,7 @@ import com.expenses.app.server.expensesappserver.repository.UdiRepository
 import com.expenses.app.server.expensesappserver.ui.database.entities.*
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.jdbc.repository.query.Query
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
 import javax.servlet.http.HttpServletRequest
@@ -11,7 +12,7 @@ import javax.servlet.http.HttpServletRequest
 @RestController
 @RequestMapping("/api")
 class UdisController(
-    private val udiRepository: UdiRepository
+        private val udiRepository: UdiRepository
 ) {
 
     @Autowired
@@ -60,4 +61,7 @@ class UdisController(
         val data = mapper.readValue<UdiCommissionPost>(body, UdiCommissionPost::class.java)
         return udiRepository.updateCommission(data)
     }
+
+    @GetMapping("/udis/global", produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun getGlobalDetails(@RequestParam(value = "udiValue") udiValue: Double): UdiGlobalDetails = udiRepository.getGlobalDetails(udiValue)
 }
