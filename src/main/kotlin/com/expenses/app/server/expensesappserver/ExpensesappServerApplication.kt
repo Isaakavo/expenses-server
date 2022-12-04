@@ -8,6 +8,7 @@ import com.nimbusds.jose.util.DefaultResourceRetriever
 import com.nimbusds.jose.util.ResourceRetriever
 import com.nimbusds.jwt.proc.ConfigurableJWTProcessor
 import com.nimbusds.jwt.proc.DefaultJWTProcessor
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.context.annotation.Bean
@@ -16,12 +17,15 @@ import java.net.URL
 
 @SpringBootApplication
 class ExpensesappServerApplication {
+
+    @Value("\${jwkURL}")
+    private val awsEndpoint: String? = null
+
     @Bean
     @Throws(MalformedURLException::class)
     fun configurableJWTProcessor(): ConfigurableJWTProcessor<SecurityContext> {
         val resourceRetriever: ResourceRetriever = DefaultResourceRetriever(2000, 2000)
-        //TODO check how to hide this from the repo
-        val jwkURL = URL("https://cognito-idp.us-east-2.amazonaws.com/us-east-2_R894BlMpq/.well-known/jwks.json")
+        val jwkURL = URL(awsEndpoint)
         val jwkSource = RemoteJWKSet<SecurityContext>(jwkURL, resourceRetriever)
         val jwtProcessor = DefaultJWTProcessor<SecurityContext>()
         val keySelector = JWSVerificationKeySelector(JWSAlgorithm.RS256, jwkSource)

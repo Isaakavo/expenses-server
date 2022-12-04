@@ -20,8 +20,7 @@ class JwtTokenFilter: OncePerRequestFilter() {
     @Autowired
     var configurableJWTProcessor: ConfigurableJWTProcessor<SecurityContext>? = null
 
-    //TODO check how to hide this from the repo
-    @Value("https://cognito-idp.us-east-2.amazonaws.com/us-east-2_R894BlMpq")
+    @Value("\${spring.security.oauth2.resourceserver.jwt.issuer-uri}")
     private var identityPoolUrl: String? = null
 
     companion object {

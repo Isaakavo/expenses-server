@@ -185,14 +185,14 @@ class UdiRepository(
         val retirementList = getAllUdi()
         var totalExpended = 0.0
         var totalUdis = 0.0
-        var totalConversion = 0.0
-        var rendimiento = 0.0
+
         retirementList?.map {
             totalExpended += it.retirementRecord?.purchaseTotal ?: 0.0
             totalUdis += it.retirementRecord?.totalOfUdi ?: 0.0
         }
-        totalConversion = totalUdis * udiValue
-        rendimiento = totalConversion - totalExpended
+
+        val totalConversion: Double = totalUdis * udiValue
+        val rendimiento = totalConversion - totalExpended
         val result = UdiGlobalDetails(
                 userId = userIdName,
                 totalExpend = totalExpended,

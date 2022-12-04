@@ -30,6 +30,8 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-spring-boot-starter:0.40.1")
     implementation("org.jetbrains.exposed:exposed-java-time:0.40.1")
 
+    implementation("org.apache.maven.plugins:maven-resources-plugin:3.3.0")
+
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")
 
