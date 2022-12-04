@@ -9,7 +9,7 @@ plugins {
 
 group = "com.expenses.app.server"
 version = "0.0.1-SNAPSHOT"
-java.sourceCompatibility = JavaVersion.VERSION_11
+java.sourceCompatibility = JavaVersion.VERSION_17
 
 repositories {
     mavenCentral()
@@ -22,14 +22,11 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
-    implementation("com.amazonaws:aws-java-sdk:1.12.322")
+    implementation("com.amazonaws:aws-java-sdk:1.12.352")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 
     // SQL ORM
-    implementation("org.postgresql:postgresql:42.5.0")
-    //implementation("org.jetbrains.exposed:exposed-core:0.40.1")
-    //implementation("org.jetbrains.exposed:exposed-dao:0.40.1")
-    //implementation("org.jetbrains.exposed:exposed-jdbc:0.40.1")
+    implementation("org.postgresql:postgresql:42.5.1")
     implementation("org.jetbrains.exposed:exposed-spring-boot-starter:0.40.1")
     implementation("org.jetbrains.exposed:exposed-java-time:0.40.1")
 
