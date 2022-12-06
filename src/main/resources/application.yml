@@ -1,0 +1,13 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/compose-postgres
+    driverClassName: org.postgresql.Driver
+    username: compose-postgres
+    password: compose-postgres
+  exposed:
+    generate-ddl: true
+  security:
+    oauth2:
+      resourceserver:
+        jwt.issuer-uri:
+          https://cognito-idp.us-east-2.amazonaws.com/us-east-2_R894BlMpq
