@@ -1,10 +1,10 @@
 version: '2'
 services:
-  app:
+  Expenses-server:
     image: 'expensesapp-server:latest'
     build:
       context: ../../../
-    container_name: app
+    container_name: spring-boot-server
     depends_on:
       - db
     environment:
@@ -16,7 +16,6 @@ services:
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
     ports:
       - "8080:8080"
-    command: java -Djava.security.egd=file:/dev/./urandom -jar /project/target/expensesapp-server-0.0.1-SNAPSHOT.jar
 
   db:
     image: 'postgres:15.1-alpine'

@@ -8,6 +8,7 @@ class ExpensesappServerApplicationTests {
 
     @Test
     fun contextLoads() {
+        assert(true)
     }
 
 }
