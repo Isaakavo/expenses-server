@@ -161,9 +161,9 @@ class UdiRepository(
     }
 
 
-    fun updateCommission(udiBonusPost: UdiBonusPost): UdiBonus {
+    fun updateCommission(udiBonusPost: UdiBonusPost, id: Int): UdiBonus {
         val updatedCommissionId = loggedTransaction {
-            udiEntityCrudTable.table.update({ UdiEntityTable.userId eq authenticationFacade.userId() and (UdiEntityTable.id eq udiBonusPost.id) }) {
+            udiEntityCrudTable.table.update({ UdiEntityTable.userId eq authenticationFacade.userId() and (UdiEntityTable.id eq id) }) {
                 it[UdiEntityTable.udiCommission] = udiBonusPost.udiCommission
                 it[UdiEntityTable.monthlyBonus] = udiBonusPost.monthlyBonus
                 it[UdiEntityTable.yearlyBonus] = udiBonusPost.yearlyBonus
@@ -171,6 +171,15 @@ class UdiRepository(
             }
         }
         val commission = finCommissionById(updatedCommissionId)
+        logger.info("$INFO_MESSAGE $commission")
+        return commission
+    }
+
+    fun deleteCommission(id: Int): UdiBonus {
+        val commission = finCommissionById(id)
+        loggedTransaction {
+            udiEntityCrudTable.table.deleteWhere { UdiEntityTable.id eq id }
+        }
         logger.info("$INFO_MESSAGE $commission")
         return commission
     }

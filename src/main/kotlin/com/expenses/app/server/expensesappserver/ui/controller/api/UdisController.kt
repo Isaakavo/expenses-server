@@ -55,11 +55,14 @@ class UdisController(
         return udiRepository.insertCommission(data)
     }
 
-    @PutMapping("/udis/commission", produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun updateCommission(@RequestBody body: String): UdiBonus {
+    @PutMapping("/udis/commission/{id}", produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun updateCommission(@RequestBody body: String, @PathVariable(value = "id") id: Int): UdiBonus {
         val data = mapper.readValue<UdiBonusPost>(body, UdiBonusPost::class.java)
-        return udiRepository.updateCommission(data)
+        return udiRepository.updateCommission(data, id)
     }
+
+    @DeleteMapping("/udis/commission/{id}", produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun deleteCommission(@PathVariable(value = "id") id: Int): UdiBonus = udiRepository.deleteCommission(id)
 
     @GetMapping("/udis/global", produces = [MediaType.APPLICATION_JSON_VALUE])
     fun getGlobalDetails(@RequestParam(value = "udiValue") udiValue: Double): UdiGlobalDetails = udiRepository.getGlobalDetails(udiValue)
