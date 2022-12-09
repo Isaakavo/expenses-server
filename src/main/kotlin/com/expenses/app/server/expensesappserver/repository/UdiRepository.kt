@@ -197,6 +197,7 @@ class UdiRepository(
     fun getGlobalDetails(udiValue: Double): UdiGlobalDetails {
         val userIdName = authenticationFacade.userId()
         val retirementList = getAllUdi()
+        val udiBonus = getAllCommissions()
         var totalExpended = 0.0
         var totalUdis = 0.0
 
@@ -215,12 +216,18 @@ class UdiRepository(
                 rendimiento = rendimiento,
                 startDate = null,
                 endDate = null,
-                paymentDeadLine = null
+                paymentDeadLine = null,
+                udiBonus = udiBonus
         )
         logger.info("$INFO_MESSAGE $result")
         return result
     }
 
+    private fun getAllCommissions() = loggedTransaction {
+        udiEntityCrudTable.find { UdiEntityTable.userId eq authenticationFacade.userId() }.map {
+            it.toUdiEntity()
+        }
+    }
     private fun getMostRecentCommission() = loggedTransaction {
         udiEntityCrudTable.find { UdiEntityTable.userId eq authenticationFacade.userId() }
                 .orderBy(UdiEntityTable.dateAdded to SortOrder.DESC).limit(1).firstOrNull()

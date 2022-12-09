@@ -48,6 +48,7 @@ data class UdiGlobalDetails(
         var startDate: Long? = null,
         var endDate: Long? = null,
         var paymentDeadLine: Int? = null,
+        val udiBonus: List<UdiBonus>
 )
 
 object RetirementTable : IntIdTable("udi") {
