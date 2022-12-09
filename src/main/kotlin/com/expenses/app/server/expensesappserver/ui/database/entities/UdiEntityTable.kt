@@ -9,42 +9,58 @@ import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.javatime.datetime
 import java.time.LocalDateTime
 
-data class UdiCommission(
-    val id: Int,
-    @JsonIgnore
-    val userId: String?,
-    val userUdis: Double,
-    val UdiCommssion: Double,
-    val dateAdded: LocalDateTime
-)
-
-data class UdiCommissionPost(
-        val id : Int,
-        val userUdis: Double,
+data class UdiBonus(
+        val id: Int,
+        @JsonIgnore
+        val userId: String?,
+        val monthlyBonus: Double,
         val udiCommission: Double,
+        val yearlyBonus: Double,
+        var monthlyTotalBonus: Double,
         val dateAdded: LocalDateTime
 )
 
-object UdiEntityTable: IntIdTable("udi_commissions") {
+data class UdiBonusPost(
+        val id: Int,
+        val monthlyBonus: Double,
+        val udiCommission: Double,
+        var yearlyBonus: Double,
+        var monthlyTotalBonus: Double,
+        val dateAdded: LocalDateTime
+) {
+
+    init {
+        this.yearlyBonus = (this.monthlyBonus + this.udiCommission) * 12
+        this.monthlyTotalBonus = this.monthlyBonus + this.udiCommission
+    }
+}
+
+object UdiEntityTable : IntIdTable("udi_commissions") {
     val userId: Column<String> = varchar("user_id", 50)
-    val userUdis: Column<Double> = double("user_udis")
+    val monthlyBonus: Column<Double> = double("monthly_bonus")
     val udiCommission: Column<Double> = double("udi_commission")
+    val yearlyBonus: Column<Double> = double("yarly_bonus")
+    val monthlyTotalBonus: Column<Double> = double("monthly_total_bonus")
     val dateAdded: Column<LocalDateTime> = datetime("date_added")
 }
 
-class UdiEntity(id: EntityID<Int>): IntEntity(id) {
-    companion object: IntEntityClass<UdiEntity>(UdiEntityTable)
+class UdiEntity(id: EntityID<Int>) : IntEntity(id) {
+    companion object : IntEntityClass<UdiEntity>(UdiEntityTable)
 
     var userId by UdiEntityTable.userId
-    var userUdis by UdiEntityTable.userUdis
-    var udiCommision by UdiEntityTable.udiCommission
+    var monthlyBonus by UdiEntityTable.monthlyBonus
+    var udiCommission by UdiEntityTable.udiCommission
+    var yearlyBonus by UdiEntityTable.yearlyBonus
+    var monthlyTotalBonus by UdiEntityTable.monthlyTotalBonus
     var dateAdded by UdiEntityTable.dateAdded
 
-    fun toUdiEntity() = UdiCommission(
-        id.value,
-        userId,
-        userUdis,
-        udiCommision,
-        dateAdded
+    fun toUdiEntity() = UdiBonus(
+            id.value,
+            userId,
+            monthlyBonus,
+            udiCommission,
+            yearlyBonus,
+            monthlyTotalBonus,
+            dateAdded
     )
 }

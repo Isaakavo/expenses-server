@@ -4,7 +4,6 @@ import com.expenses.app.server.expensesappserver.repository.UdiRepository
 import com.expenses.app.server.expensesappserver.ui.database.entities.*
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.data.jdbc.repository.query.Query
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
 import javax.servlet.http.HttpServletRequest
@@ -47,18 +46,18 @@ class UdisController(
 
 
     @GetMapping("/udis/commission", produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun getCommission(): List<UdiCommission> = udiRepository.getCommissions()
+    fun getCommission(): List<UdiBonus> = udiRepository.getCommissions()
 
 
     @PostMapping("/udis/commission", produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun insertCommission(@RequestBody body: String): UdiCommission {
-        val data = mapper.readValue<UdiCommissionPost>(body, UdiCommissionPost::class.java)
+    fun insertCommission(@RequestBody body: String): UdiBonus {
+        val data = mapper.readValue<UdiBonusPost>(body, UdiBonusPost::class.java)
         return udiRepository.insertCommission(data)
     }
 
     @PutMapping("/udis/commission", produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun updateCommission(@RequestBody body: String): UdiCommission {
-        val data = mapper.readValue<UdiCommissionPost>(body, UdiCommissionPost::class.java)
+    fun updateCommission(@RequestBody body: String): UdiBonus {
+        val data = mapper.readValue<UdiBonusPost>(body, UdiBonusPost::class.java)
         return udiRepository.updateCommission(data)
     }
 

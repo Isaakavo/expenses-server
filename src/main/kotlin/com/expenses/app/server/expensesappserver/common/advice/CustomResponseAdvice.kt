@@ -4,7 +4,7 @@ import com.expenses.app.server.expensesappserver.common.responses.ApiResponse
 import com.expenses.app.server.expensesappserver.common.responses.BodyResponse
 import com.expenses.app.server.expensesappserver.common.responses.Status
 import com.expenses.app.server.expensesappserver.ui.database.entities.ResponseRetirementRecord
-import com.expenses.app.server.expensesappserver.ui.database.entities.UdiCommission
+import com.expenses.app.server.expensesappserver.ui.database.entities.UdiBonus
 import com.expenses.app.server.expensesappserver.ui.database.entities.UdiGlobalDetails
 import org.springframework.core.MethodParameter
 import org.springframework.http.HttpStatus
@@ -53,7 +53,7 @@ class CustomResponseAdvice : ResponseBodyAdvice<Any> {
                                 )
                         )
                     }
-                    is UdiCommission -> {
+                    is UdiBonus -> {
                         response.setStatusCode(HttpStatus.OK)
                         return ApiResponse(
                                 Status.SUCCESS,
@@ -73,7 +73,7 @@ class CustomResponseAdvice : ResponseBodyAdvice<Any> {
                     BodyResponse(userId = body.retirementRecord?.userId, message = "", size = 1, data = listOf(body))
                 )
             }
-            is UdiCommission -> {
+            is UdiBonus -> {
                 return ApiResponse(
                     Status.SUCCESS,
                     BodyResponse(userId = body.userId, message = "", size = 1, listOf(body))
