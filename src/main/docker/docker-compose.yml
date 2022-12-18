@@ -8,11 +8,11 @@ services:
     depends_on:
       - db
     environment:
-      - SPRING_PROFILES_ACTIVE=dev
-      - ARGS=--spring.config.location=../resources/application-dev.yml
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/compose-postgres
-      - SPRING_DATASOURCE_USERNAME=compose-postgres
-      - SPRING_DATASOURCE_PASSWORD=compose-postgres
+      - DATABASE_URL_POSTGRES=jdbc:postgresql://expenses_app_db:5432/postgres
+      - DATABASE_USERNAME=postgres
+      - DATABASE_PASSWORD=postgres
+      - jwkURL=yourawsurl
+      - JWT_ISSUER_URI=yourawsissuer
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
     ports:
       - "8080:8080"
@@ -21,7 +21,7 @@ services:
     image: 'postgres:15.1-alpine'
     container_name: expenses_app_db
     environment:
-      - POSTGRES_USER=compose-postgres
-      - POSTGRES_PASSWORD=compose-postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
     ports:
       - "5432:5432"

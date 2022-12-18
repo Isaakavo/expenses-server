@@ -4,7 +4,7 @@ WORKDIR /app
 COPY gradle/ gradle
 COPY gradlew build.gradle.kts ./
 
-RUN ls -al
+RUN ./gradlew clean
 RUN ./gradlew build -x test
 
 COPY src ./src

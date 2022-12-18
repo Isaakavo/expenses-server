@@ -1,17 +1,14 @@
 spring:
-  cloud:
-    config:
-      enabled: false
-  config:
-    activate:
-      on-profile: dev
-    import:
-        optional:secrets.yml
+  security:
+    oauth2:
+      resourceserver:
+        jwt.issuer-uri:
+          https://cognito-idp.us-east-2.amazonaws.com/us-east-2_R894BlMpq
   datasource:
-    url: jdbc:postgresql://localhost:5432/compose-postgres
+    url: jdbc:postgresql://localhost:5432/postgres
     driverClassName: org.postgresql.Driver
-    username: compose-postgres
-    password: compose-postgres
+    username: postgres
+    password: postgres
   exposed:
     generate-ddl: true
-jwkURL: ''
+jwkURL: https://cognito-idp.us-east-2.amazonaws.com/us-east-2_R894BlMpq/.well-known/jwks.json
