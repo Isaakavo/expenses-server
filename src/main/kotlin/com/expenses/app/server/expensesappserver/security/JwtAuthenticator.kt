@@ -10,12 +10,10 @@ class JwtAuthenticator(
 ): AbstractAuthenticationToken(authorities) {
 
     override fun getCredentials(): Any {
-        println("Credentials $authorities")
         return emptyList<String>()
     }
 
     override fun getPrincipal(): Any {
-        println("Principal $authorities")
         return emptyList<String>()
     }
 

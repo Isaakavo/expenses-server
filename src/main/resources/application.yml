@@ -1,19 +1,23 @@
 spring:
-  exposed:
+  Exposed:
     generate-ddl: true
   security:
     oauth2:
       resourceserver:
         jwt.issuer-uri:
           ${JWT_ISSUER_URI}
+
   datasource:
     url: ${DATABASE_URL_POSTGRES}
     driverClassName: org.postgresql.Driver
     username: ${DATABASE_USERNAME}
     password: ${DATABASE_PASSWORD}
     proxyPort: 5432
+
 org:
   gradle:
     daemon: false
     jvmargs: -Xmx1024m
+
+
 jwkURL: ${jwkURL}

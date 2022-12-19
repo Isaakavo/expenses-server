@@ -40,7 +40,6 @@ class JwtTokenFilter: OncePerRequestFilter() {
             validateToken(claims)
             val username = getUsername(claims)
             if (username != null) {
-                println(username)
                 val auth = UsernamePasswordAuthenticationToken(username, null)
                 auth.details = WebAuthenticationDetailsSource().buildDetails(request)
                 SecurityContextHolder.getContext().authentication = auth

@@ -6,6 +6,8 @@ import com.expenses.app.server.expensesappserver.security.AuthenticationFacade
 import com.expenses.app.server.expensesappserver.ui.database.entities.*
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.statements.StatementContext
+import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -18,7 +20,6 @@ class UdiRepository(
 
     companion object {
         val logger: Logger = LoggerFactory.getLogger(UdiRepository::class.java)
-        const val INFO_MESSAGE = "Returning data for user"
     }
 
     val retirementRecordCrudTable = RetirementRecordEntity
@@ -34,7 +35,7 @@ class UdiRepository(
                 retirementRecord,
                 udiConversions
         )
-        logger.info("$INFO_MESSAGE $response")
+        logger.info("Returning udi By Id with id $id")
         return response
     }
 
@@ -65,7 +66,7 @@ class UdiRepository(
 
             )
         }
-        logger.info("$INFO_MESSAGE $udiResponseList")
+        logger.info("Returning all udis with size ${udiResponseList.size}")
         return udiResponseList.toList()
     }
 
@@ -93,7 +94,7 @@ class UdiRepository(
                 result,
                 udiconversions
         )
-        logger.info("$INFO_MESSAGE $insertedValue")
+        logger.info("Inserted udi")
         return insertedValue
     }
 
@@ -118,7 +119,7 @@ class UdiRepository(
                 newRetirementRecord,
                 udiconversions
         )
-        logger.info("$INFO_MESSAGE $updatedValue")
+        logger.info("Updated udi value with Id $id")
         return updatedValue
     }
 
@@ -128,7 +129,7 @@ class UdiRepository(
             retirementRecordCrudTable.table.deleteWhere { RetirementTable.id eq id }
         }
         val deletedUdi = ResponseRetirementRecord(singleRetirementRecord.id, singleRetirementRecord)
-        logger.info("$INFO_MESSAGE $deletedUdi")
+        logger.info("Deleted udi with Id $id")
         return deletedUdi
     }
 
@@ -139,7 +140,7 @@ class UdiRepository(
                         it.toUdiEntity()
                     }
         }
-        logger.info("$INFO_MESSAGE $commissions")
+        logger.info("Get commission")
         return commissions
     }
 
@@ -156,7 +157,7 @@ class UdiRepository(
             }
         }
         val commission = finCommissionById(recentAddedCommission.id.value)
-        logger.info("$INFO_MESSAGE $commission")
+        logger.info("Inserted new commission with value $udiBonusPost")
         return commission
     }
 
@@ -171,7 +172,7 @@ class UdiRepository(
             }
         }
         val commission = finCommissionById(updatedCommissionId)
-        logger.info("$INFO_MESSAGE $commission")
+        logger.info("Updated commission with value $udiBonusPost")
         return commission
     }
 
@@ -180,7 +181,7 @@ class UdiRepository(
         loggedTransaction {
             udiEntityCrudTable.table.deleteWhere { UdiEntityTable.id eq id }
         }
-        logger.info("$INFO_MESSAGE $commission")
+        logger.info("Deleted commission with Id $id")
         return commission
     }
 
@@ -219,7 +220,7 @@ class UdiRepository(
                 paymentDeadLine = null,
                 udiBonus = udiBonus
         )
-        logger.info("$INFO_MESSAGE $result")
+        logger.info("Returned Global details values with udiValue $udiValue")
         return result
     }
 
@@ -255,7 +256,17 @@ class UdiRepository(
     }
 
     fun <T> loggedTransaction(statement: Transaction.() -> T): T = transaction {
-        addLogger(StdOutSqlLogger)
+        addLogger(SafeSqlLogger)
         statement()
+    }
+}
+
+
+object SafeSqlLogger : SqlLogger {
+
+    private val logger: Logger = LoggerFactory.getLogger(SafeSqlLogger::class.java)
+
+    override fun log(context: StatementContext, transaction: Transaction) {
+        logger.debug(context.sql(TransactionManager.current()))
     }
 }
