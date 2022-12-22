@@ -15,7 +15,7 @@ import org.springframework.stereotype.Repository
 
 @Repository
 class UdiRepository(
-        private val authenticationFacade: AuthenticationFacade
+    private val authenticationFacade: AuthenticationFacade
 ) {
 
     companion object {
@@ -29,11 +29,11 @@ class UdiRepository(
         val retirementRecord = findUdiById(id)
         val commission = retirementRecord.udiBonus
         val udiConversions =
-                calculateCommissions(commission.monthlyBonus, commission.udiCommission, retirementRecord.udiValue)
+            calculateCommissions(commission.monthlyBonus, commission.udiCommission, retirementRecord.udiValue)
         val response = ResponseRetirementRecord(
-                retirementRecord.id,
-                retirementRecord,
-                udiConversions
+            retirementRecord.id,
+            retirementRecord,
+            udiConversions
         )
         logger.info("Returning udi By Id with id $id")
         return response
@@ -43,8 +43,8 @@ class UdiRepository(
         val userId = authenticationFacade.userId()
         val retirementData = loggedTransaction {
             retirementRecordCrudTable.find { RetirementTable.userId eq userId }
-                    .orderBy(RetirementTable.dateOfPurchase to SortOrder.DESC)
-                    .map { it.toRetirementRecord() }
+                .orderBy(RetirementTable.dateOfPurchase to SortOrder.DESC)
+                .map { it.toRetirementRecord() }
         }
 
         if (retirementData.isEmpty()) return emptyList()
@@ -53,16 +53,16 @@ class UdiRepository(
         retirementData.forEach { value ->
             val commissionData = value.udiBonus
             val udiConversion = calculateCommissions(
-                    commissionData.monthlyBonus,
-                    commissionData.udiCommission,
-                    value.udiValue
+                commissionData.monthlyBonus,
+                commissionData.udiCommission,
+                value.udiValue
             )
             udiResponseList.add(
-                    ResponseRetirementRecord(
-                            value.id,
-                            value,
-                            udiConversion
-                    )
+                ResponseRetirementRecord(
+                    value.id,
+                    value,
+                    udiConversion
+                )
 
             )
         }
@@ -76,23 +76,23 @@ class UdiRepository(
         val totalOfUdiCalculation = retirementRecord.purchaseTotal / retirementRecord.udiValue
         val result = loggedTransaction {
             retirementRecordCrudTable
-                    .new {
-                        userId = userIdName
-                        udiCommission = mostRecentCommission
-                        purchaseTotal = retirementRecord.purchaseTotal
-                        totalOfUdi = totalOfUdiCalculation
-                        dateOfPurchase = retirementRecord.dateOfPurchase
-                        udiValue = retirementRecord.udiValue
-                    }.toRetirementRecord()
+                .new {
+                    userId = userIdName
+                    udiCommission = mostRecentCommission
+                    purchaseTotal = retirementRecord.purchaseTotal
+                    totalOfUdi = totalOfUdiCalculation
+                    dateOfPurchase = retirementRecord.dateOfPurchase
+                    udiValue = retirementRecord.udiValue
+                }.toRetirementRecord()
         }
 
         val rawCommissionUdi = mostRecentCommission.toUdiEntity()
         val udiconversions =
-                calculateCommissions(rawCommissionUdi.monthlyBonus, rawCommissionUdi.udiCommission, result.udiValue)
+            calculateCommissions(rawCommissionUdi.monthlyBonus, rawCommissionUdi.udiCommission, result.udiValue)
         val insertedValue = ResponseRetirementRecord(
-                result.id,
-                result,
-                udiconversions
+            result.id,
+            result,
+            udiconversions
         )
         logger.info("Inserted udi")
         return insertedValue
@@ -101,23 +101,22 @@ class UdiRepository(
     fun updateUdi(id: Int, retirementRecordPost: RetirementRecordPost): ResponseRetirementRecord {
         val retirementRecord = findUdiById(id)
         val commission = retirementRecord.udiBonus
-        val totalOfUdiCalculation = retirementRecord.purchaseTotal / retirementRecord.udiValue
         loggedTransaction {
             retirementRecordCrudTable
-                    .table.update({ RetirementTable.id eq id }) {
-                        it[RetirementTable.udiValue] = retirementRecordPost.udiValue
-                        it[RetirementTable.dateOfPurchase] = retirementRecordPost.dateOfPurchase
-                        it[RetirementTable.purchaseTotal] = retirementRecordPost.purchaseTotal
-                        it[RetirementTable.totalOfUdi] = totalOfUdiCalculation
-                    }
+                .table.update({ RetirementTable.id eq id }) {
+                    it[RetirementTable.udiValue] = retirementRecordPost.udiValue
+                    it[RetirementTable.dateOfPurchase] = retirementRecordPost.dateOfPurchase
+                    it[RetirementTable.purchaseTotal] = retirementRecordPost.purchaseTotal
+                    it[RetirementTable.totalOfUdi] = retirementRecordPost.purchaseTotal / retirementRecordPost.udiValue
+                }
         }
         val udiconversions =
-                calculateCommissions(commission.monthlyBonus, commission.udiCommission, retirementRecordPost.udiValue)
+            calculateCommissions(commission.monthlyBonus, commission.udiCommission, retirementRecordPost.udiValue)
         val newRetirementRecord = findUdiById(id)
         val updatedValue = ResponseRetirementRecord(
-                retirementRecord.id,
-                newRetirementRecord,
-                udiconversions
+            retirementRecord.id,
+            newRetirementRecord,
+            udiconversions
         )
         logger.info("Updated udi value with Id $id")
         return updatedValue
@@ -136,9 +135,9 @@ class UdiRepository(
     fun getCommissions(): List<UdiBonus> {
         val commissions = loggedTransaction {
             udiEntityCrudTable.find { UdiEntityTable.userId eq authenticationFacade.userId() }
-                    .map {
-                        it.toUdiEntity()
-                    }
+                .map {
+                    it.toUdiEntity()
+                }
         }
         logger.info("Get commission")
         return commissions
@@ -164,12 +163,15 @@ class UdiRepository(
 
     fun updateCommission(udiBonusPost: UdiBonusPost, id: Int): UdiBonus {
         val updatedCommissionId = loggedTransaction {
-            udiEntityCrudTable.table.update({ UdiEntityTable.userId eq authenticationFacade.userId() and (UdiEntityTable.id eq id) }) {
-                it[UdiEntityTable.udiCommission] = udiBonusPost.udiCommission
-                it[UdiEntityTable.monthlyBonus] = udiBonusPost.monthlyBonus
-                it[UdiEntityTable.yearlyBonus] = udiBonusPost.yearlyBonus
-                it[UdiEntityTable.monthlyTotalBonus] = udiBonusPost.monthlyTotalBonus
-            }
+            udiEntityCrudTable.table
+                .update({
+                    UdiEntityTable.userId eq authenticationFacade.userId() and (UdiEntityTable.id eq id)
+                }) {
+                    it[UdiEntityTable.udiCommission] = udiBonusPost.udiCommission
+                    it[UdiEntityTable.monthlyBonus] = udiBonusPost.monthlyBonus
+                    it[UdiEntityTable.yearlyBonus] = udiBonusPost.yearlyBonus
+                    it[UdiEntityTable.monthlyTotalBonus] = udiBonusPost.monthlyTotalBonus
+                }
         }
         val commission = finCommissionById(updatedCommissionId)
         logger.info("Updated commission with value $udiBonusPost")
@@ -188,11 +190,11 @@ class UdiRepository(
 
     fun findUdiById(id: Int) = loggedTransaction {
         retirementRecordCrudTable.find { RetirementTable.id eq id and (RetirementTable.userId eq authenticationFacade.userId()) }
-                .limit(1).firstOrNull()?.toRetirementRecord()
+            .limit(1).firstOrNull()?.toRetirementRecord()
     } ?: throw EntityNotFoundException(
-            status = Status.NO_DATA,
-            customMessage = "This udi id doesnt exists",
-            id = authenticationFacade.userId()
+        status = Status.NO_DATA,
+        customMessage = "This udi id doesnt exists",
+        id = authenticationFacade.userId()
     )
 
     fun getGlobalDetails(udiValue: Double): UdiGlobalDetails {
@@ -210,15 +212,15 @@ class UdiRepository(
         val totalConversion: Double = totalUdis * udiValue
         val rendimiento = totalConversion - totalExpended
         val result = UdiGlobalDetails(
-                userId = userIdName,
-                totalExpend = totalExpended,
-                udisTotal = totalUdis,
-                udisConvertion = totalConversion,
-                rendimiento = rendimiento,
-                startDate = null,
-                endDate = null,
-                paymentDeadLine = null,
-                udiBonus = udiBonus
+            userId = userIdName,
+            totalExpend = totalExpended,
+            udisTotal = totalUdis,
+            udisConvertion = totalConversion,
+            rendimiento = rendimiento,
+            startDate = null,
+            endDate = null,
+            paymentDeadLine = null,
+            udiBonus = udiBonus
         )
         logger.info("Returned Global details values with udiValue $udiValue")
         return result
@@ -229,29 +231,30 @@ class UdiRepository(
             it.toUdiEntity()
         }
     }
+
     private fun getMostRecentCommission() = loggedTransaction {
         udiEntityCrudTable.find { UdiEntityTable.userId eq authenticationFacade.userId() }
-                .orderBy(UdiEntityTable.dateAdded to SortOrder.DESC).limit(1).firstOrNull()
+            .orderBy(UdiEntityTable.dateAdded to SortOrder.DESC).limit(1).firstOrNull()
     } ?: throw EntityNotFoundException(
-            status = Status.NO_DATA,
-            customMessage = "This user doesnt have a udi commission",
-            id = authenticationFacade.userId()
+        status = Status.NO_DATA,
+        customMessage = "This user doesnt have a udi commission",
+        id = authenticationFacade.userId()
     )
 
     private fun finCommissionById(id: Int) = loggedTransaction {
         udiEntityCrudTable.find { UdiEntityTable.userId eq authenticationFacade.userId() and (UdiEntityTable.id eq id) }
-                .limit(1).firstOrNull()
-                ?.toUdiEntity()
+            .limit(1).firstOrNull()
+            ?.toUdiEntity()
     } ?: throw EntityNotFoundException(
-            status = Status.NO_DATA,
-            customMessage = "This user doesnt have a udi commission",
-            id = authenticationFacade.userId()
+        status = Status.NO_DATA,
+        customMessage = "This user doesnt have a udi commission",
+        id = authenticationFacade.userId()
     )
 
     private fun calculateCommissions(userUdis: Double, udiCommission: Double, udiValue: Double): UdiConversions {
         return UdiConversions(
-                udiConversion = userUdis * udiValue,
-                udiCommissionConversion = udiValue * udiCommission,
+            udiConversion = userUdis * udiValue,
+            udiCommissionConversion = udiValue * udiCommission,
         )
     }
 

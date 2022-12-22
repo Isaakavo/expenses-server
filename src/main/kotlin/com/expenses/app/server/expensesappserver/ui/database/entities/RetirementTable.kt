@@ -11,14 +11,14 @@ import org.jetbrains.exposed.sql.javatime.datetime
 import java.time.LocalDateTime
 
 data class RetirementRecord(
-        var id: Int? = null,
-        @JsonIgnore
+    var id: Int? = null,
+    @JsonIgnore
     val userId: String,
-        val purchaseTotal: Double,
-        val udiValue: Double,
-        val totalOfUdi: Double,
-        val dateOfPurchase: LocalDateTime,
-        val udiBonus: UdiBonus,
+    val purchaseTotal: Double,
+    val udiValue: Double,
+    val totalOfUdi: Double,
+    val dateOfPurchase: LocalDateTime,
+    val udiBonus: UdiBonus,
 )
 
 data class RetirementRecordPost(
