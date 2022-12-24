@@ -3,12 +3,10 @@ package com.expenses.app.server.expensesappserver.repository
 import com.expenses.app.server.expensesappserver.common.exceptions.EntityNotFoundException
 import com.expenses.app.server.expensesappserver.common.responses.Status
 import com.expenses.app.server.expensesappserver.security.AuthenticationFacade
-import com.expenses.app.server.expensesappserver.ui.database.entities.*
+import com.expenses.app.server.expensesappserver.ui.database.entities.udis.*
+import com.expenses.app.server.expensesappserver.utils.loggedTransaction
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.statements.StatementContext
-import org.jetbrains.exposed.sql.transactions.TransactionManager
-import org.jetbrains.exposed.sql.transactions.transaction
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Repository
@@ -258,18 +256,7 @@ class UdiRepository(
         )
     }
 
-    fun <T> loggedTransaction(statement: Transaction.() -> T): T = transaction {
-        addLogger(SafeSqlLogger)
-        statement()
-    }
+
 }
 
 
-object SafeSqlLogger : SqlLogger {
-
-    private val logger: Logger = LoggerFactory.getLogger(SafeSqlLogger::class.java)
-
-    override fun log(context: StatementContext, transaction: Transaction) {
-        logger.debug(context.sql(TransactionManager.current()))
-    }
-}

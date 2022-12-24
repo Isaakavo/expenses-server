@@ -3,9 +3,9 @@ package com.expenses.app.server.expensesappserver.common.advice
 import com.expenses.app.server.expensesappserver.common.responses.ApiResponse
 import com.expenses.app.server.expensesappserver.common.responses.BodyResponse
 import com.expenses.app.server.expensesappserver.common.responses.Status
-import com.expenses.app.server.expensesappserver.ui.database.entities.ResponseRetirementRecord
-import com.expenses.app.server.expensesappserver.ui.database.entities.UdiBonus
-import com.expenses.app.server.expensesappserver.ui.database.entities.UdiGlobalDetails
+import com.expenses.app.server.expensesappserver.ui.database.entities.udis.ResponseRetirementRecord
+import com.expenses.app.server.expensesappserver.ui.database.entities.udis.UdiBonus
+import com.expenses.app.server.expensesappserver.ui.database.entities.udis.UdiGlobalDetails
 import org.springframework.core.MethodParameter
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType

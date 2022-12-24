@@ -1,4 +1,4 @@
-package com.expenses.app.server.expensesappserver.ui.database.entities
+package com.expenses.app.server.expensesappserver.ui.database.entities.udis
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import org.jetbrains.exposed.dao.IntEntity
