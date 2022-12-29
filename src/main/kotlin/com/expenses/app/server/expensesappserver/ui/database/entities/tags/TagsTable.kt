@@ -9,6 +9,7 @@ import org.jetbrains.exposed.sql.javatime.datetime
 import java.time.LocalDateTime
 
 data class Tags(
+    val id: Int? = null,
     val tagName: String,
     val dateAdded: LocalDateTime
 )
@@ -27,6 +28,7 @@ class TagEntity(
     var dateAdded by TagsTable.dateAdded
 
     fun toTags() = Tags(
+        id.value,
         tagName,
         dateAdded
     )
