@@ -1,5 +1,6 @@
 package com.expenses.app.server.expensesappserver.common.advice
 
+import com.expenses.app.server.expensesappserver.common.exceptions.BadRequestException
 import com.expenses.app.server.expensesappserver.common.exceptions.EntityNotFoundException
 import com.expenses.app.server.expensesappserver.common.exceptions.UnauthorizedException
 import com.expenses.app.server.expensesappserver.common.responses.BodyResponse
@@ -17,6 +18,14 @@ class CustomErrorAdvice {
         return ResponseEntity(
             ErrorResponse(status = ex.status, BodyResponse(userId = ex.id, message = ex.customMessage)),
             HttpStatus.OK
+        )
+    }
+
+    @ExceptionHandler(BadRequestException::class)
+    fun handleBadRequest(ex: BadRequestException): ResponseEntity<Any> {
+        return ResponseEntity(
+            ErrorResponse(status = ex.status, BodyResponse(message = ex.customMessage)),
+            HttpStatus.BAD_REQUEST
         )
     }
 

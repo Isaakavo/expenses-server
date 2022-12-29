@@ -1,7 +1,7 @@
 package com.expenses.app.server.expensesappserver.common.responses
 
 enum class Status {
-    FAIL, SUCCESS, NO_DATA, NO_COMMISSION_DATA, UNAUTHORIZED
+    FAIL, SUCCESS, NO_DATA, NO_COMMISSION_DATA, UNAUTHORIZED, BAD_REQUEST
 }
 
 data class ApiResponse(val status: Status, val body: BodyResponse<Any?>?)

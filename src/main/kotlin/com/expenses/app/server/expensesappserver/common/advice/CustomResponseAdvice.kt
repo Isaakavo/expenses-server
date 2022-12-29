@@ -3,6 +3,7 @@ package com.expenses.app.server.expensesappserver.common.advice
 import com.expenses.app.server.expensesappserver.common.responses.ApiResponse
 import com.expenses.app.server.expensesappserver.common.responses.BodyResponse
 import com.expenses.app.server.expensesappserver.common.responses.Status
+import com.expenses.app.server.expensesappserver.ui.database.entities.expenses.Expenses
 import com.expenses.app.server.expensesappserver.ui.database.entities.udis.ResponseRetirementRecord
 import com.expenses.app.server.expensesappserver.ui.database.entities.udis.UdiBonus
 import com.expenses.app.server.expensesappserver.ui.database.entities.udis.UdiGlobalDetails
@@ -63,6 +64,19 @@ class CustomResponseAdvice : ResponseBodyAdvice<Any> {
                                         size = body.size,
                                         data = body
                                 )
+                        )
+                    }
+
+                    is Expenses -> {
+                        response.setStatusCode(HttpStatus.OK)
+                        return ApiResponse(
+                            Status.SUCCESS,
+                            BodyResponse(
+                                userId = objType.userId,
+                                message = "",
+                                size = body.size,
+                                data = body
+                            )
                         )
                     }
                 }

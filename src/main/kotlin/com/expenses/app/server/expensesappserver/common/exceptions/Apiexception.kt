@@ -7,8 +7,7 @@ import java.lang.RuntimeException
 
 data class EntityNotFoundException(val status: Status, val customMessage: String, val id: String): RuntimeException(customMessage)
 
-@ResponseStatus(value = HttpStatus.BAD_REQUEST)
-class BadRequestException(message: String): RuntimeException(message)
+class BadRequestException(val status: Status, val customMessage: String): RuntimeException(customMessage)
 
 @ResponseStatus(value = HttpStatus.UNAUTHORIZED)
 data class UnauthorizedException(val status: Status, val customMessage: String): RuntimeException(customMessage)

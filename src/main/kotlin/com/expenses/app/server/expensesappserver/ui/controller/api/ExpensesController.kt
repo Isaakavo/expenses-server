@@ -26,9 +26,9 @@ class ExpensesController(
     fun getAllExpenses(): List<Expenses> = expensesRepository.getAllExpenses()
 
     @PostMapping("/expenses", produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun insertExpense(@RequestBody body: String) {
+    fun insertExpense(@RequestBody body: String): Expenses {
         val data = mapper.readValue<ExpensesPost>(body, ExpensesPost::class.java)
-        expensesRepository.insertExpense(data)
+        return expensesRepository.insertExpense(data)
     }
 
     @GetMapping("/tags", produces = [MediaType.APPLICATION_JSON_VALUE])
