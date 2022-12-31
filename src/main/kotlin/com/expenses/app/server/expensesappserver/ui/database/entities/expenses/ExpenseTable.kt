@@ -9,6 +9,7 @@ import org.jetbrains.exposed.dao.IntEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.Column
+import org.jetbrains.exposed.sql.ReferenceOption
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.javatime.datetime
 import java.time.LocalDateTime
@@ -34,7 +35,7 @@ data class ExpensesPost(
 
 object ExpensesTags : Table() {
     val expense = reference("expense", ExpenseTable)
-    val tag = reference("tag", TagsTable)
+    val tag = reference("tag", TagsTable, onDelete = ReferenceOption.NO_ACTION)
     override val primaryKey = PrimaryKey(expense, tag, name = "PK_ExpensesTags")
 }
 
@@ -72,5 +73,3 @@ class ExpenseEntity(
 fun List<TagEntity>.toTags(): List<Tags> = this.map {
     it.toTags()
 }
-
-fun List<ExpenseEntity>.toExpense(): List<Expenses> = this.map { it.toExpense() }
