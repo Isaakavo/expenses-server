@@ -31,7 +31,7 @@ class CustomResponseAdvice : ResponseBodyAdvice<Any> {
         request: ServerHttpRequest,
         response: ServerHttpResponse
     ): Any? {
-
+        val offset = fromQuery(request.uri.query, "offset")?.toInt() ?: "0".toInt()
         when (body) {
             is List<*> -> {
                 if (body.isEmpty()) return ApiResponse(
@@ -39,35 +39,25 @@ class CustomResponseAdvice : ResponseBodyAdvice<Any> {
                     BodyResponse(
                         message = "No data for this user",
                         size = 0,
+                        offset = offset
                     )
                 )
+                // TODO convert this to factory method
                 when (val objType = body[0]) {
                     is ResponseRetirementRecord -> {
                         response.setStatusCode(HttpStatus.OK)
                         return ApiResponse(
-                                Status.SUCCESS,
-                                BodyResponse(
-                                        userId = objType.retirementRecord?.userId,
-                                        message = "",
-                                        size = body.size,
-                                        data = body
-                                )
-                        )
-                    }
-                    is UdiBonus -> {
-                        response.setStatusCode(HttpStatus.OK)
-                        return ApiResponse(
-                                Status.SUCCESS,
-                                BodyResponse(
-                                        userId = objType.userId,
-                                        message = "",
-                                        size = body.size,
-                                        data = body
-                                )
+                            Status.SUCCESS,
+                            BodyResponse(
+                                userId = objType.retirementRecord?.userId,
+                                message = "",
+                                size = body.size,
+                                data = body
+                            )
                         )
                     }
 
-                    is Expenses -> {
+                    is UdiBonus -> {
                         response.setStatusCode(HttpStatus.OK)
                         return ApiResponse(
                             Status.SUCCESS,
@@ -79,35 +69,63 @@ class CustomResponseAdvice : ResponseBodyAdvice<Any> {
                             )
                         )
                     }
+
+                    is Expenses -> {
+                        response.setStatusCode(HttpStatus.OK)
+                        return ApiResponse(
+                            Status.SUCCESS,
+                            BodyResponse(
+                                userId = objType.userId,
+                                message = "",
+                                size = body.size,
+                                offset = offset,
+                                data = body
+                            )
+                        )
+                    }
                 }
             }
+
             is ResponseRetirementRecord -> {
                 return ApiResponse(
                     Status.SUCCESS,
                     BodyResponse(userId = body.retirementRecord?.userId, message = "", size = 1, data = listOf(body))
                 )
             }
+
             is UdiBonus -> {
                 return ApiResponse(
                     Status.SUCCESS,
-                    BodyResponse(userId = body.userId, message = "", size = 1, listOf(body))
+                    BodyResponse(userId = body.userId, message = "", size = 1, data = listOf(body))
                 )
             }
 
             is UdiGlobalDetails -> {
                 response.setStatusCode(HttpStatus.OK)
                 return ApiResponse(
-                        Status.SUCCESS,
-                        BodyResponse(
-                                userId = body.userId,
-                                message = "",
-                                size = 1,
-                                data = listOf(body)
-                        )
+                    Status.SUCCESS,
+                    BodyResponse(
+                        userId = body.userId,
+                        message = "",
+                        size = 1,
+                        data = listOf(body)
+                    )
                 )
             }
         }
         return body
+    }
+
+    fun fromQuery(query: String?, parameter: String): String? {
+        if (query != null) {
+            val queries = query.split("&")
+            val queryMap = queries.associate {
+                val arr = it.split("=")
+                arr[0] to arr[1]
+            }
+            return queryMap[parameter]
+        }
+        return null
     }
 }
 

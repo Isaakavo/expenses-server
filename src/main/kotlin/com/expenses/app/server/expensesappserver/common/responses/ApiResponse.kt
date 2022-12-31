@@ -12,5 +12,6 @@ data class BodyResponse<out T>(
     val userId: String? = null,
     val message: String = "",
     val size: Int = 0,
+    val offset: Int = 0,
     val data: List<T> = emptyList(),
 )

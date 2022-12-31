@@ -19,7 +19,11 @@ class ExpensesController(
     private lateinit var mapper: ObjectMapper
 
     @GetMapping("/expenses", produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun getAllExpenses(): List<Expenses> = expensesRepository.getAllExpenses()
+    fun getAllExpenses(
+        @RequestParam(value = "size", defaultValue = "30") size: Int,
+        @RequestParam(value = "offset", defaultValue = "0") offset: Long = 0L
+
+    ): List<Expenses> = expensesRepository.getAllExpenses(size, offset)
 
     @PostMapping("/expenses", produces = [MediaType.APPLICATION_JSON_VALUE])
     fun insertExpense(@RequestBody body: String): Expenses {

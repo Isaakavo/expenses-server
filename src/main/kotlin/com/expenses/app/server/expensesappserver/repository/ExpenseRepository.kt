@@ -28,15 +28,15 @@ class ExpenseRepository(
     val tagsCrudTable = TagEntity
     val expensesTagsTable = ExpensesTags
 
-    fun getAllExpenses(): List<Expenses> {
+    fun getAllExpenses(size: Int, offset: Long): List<Expenses> {
         val userIdName = authenticationFacade.userId()
 
         val expense = loggedTransaction {
             expenseCrudTable.find { ExpenseTable.userId eq userIdName }
                 .orderBy(ExpenseTable.dateAdded to SortOrder.DESC)
+                .limit(size, offset = offset)
                 .map { it.toExpense() }
         }
-
         return expense
     }
 
