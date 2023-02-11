@@ -52,17 +52,13 @@ class ExpenseRepository(
 
         var insertedExpense: Expenses? = null
         loggedTransaction {
-            // Check if some tags already exists
             tagsPost.forEach { tag ->
-                val internTag = tagsCrudTable.find { TagsTable.tagName eq tag.tagName }.firstOrNull()
-                // Only insert into the table tags that doesn't exist
-                if (internTag == null) {
-                    tagsCrudTable.new {
-                        dateAdded = tag.dateAdded
-                        tagName = tag.tagName.lowercase()
-                    }
+                tagsCrudTable.table.insertIgnore {
+                    it[TagsTable.dateAdded] = tag.dateAdded
+                    it[TagsTable.tagName] = tag.tagName
                 }
             }
+
             // Get all the tags that come from the request
             val tagsArr = mutableListOf<TagEntity>()
             tagsPost.map {
@@ -77,9 +73,9 @@ class ExpenseRepository(
                 total = expenses.total
                 dateAdded = expenses.dateAdded
                 comments = expenses.comments
+                tags = SizedCollection(tagsArr)
             }
 
-            expense.tags = SizedCollection(tagsArr)
             insertedExpense = expense.toExpense()
         }
 

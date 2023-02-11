@@ -15,7 +15,7 @@ data class Tags(
 )
 
 object TagsTable: IntIdTable("tag") {
-    val tagName: Column<String> = varchar("tag_name", 25)
+    val tagName: Column<String> = varchar("tag_name", 25).uniqueIndex()
     val dateAdded: Column<LocalDateTime> = datetime("date_added")
 }
 
