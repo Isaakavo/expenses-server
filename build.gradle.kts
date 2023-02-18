@@ -28,8 +28,9 @@ dependencies {
 
     // SQL ORM
     implementation("org.postgresql:postgresql:42.5.1")
-    implementation("org.jetbrains.exposed:exposed-spring-boot-starter:0.40.1")
-    implementation("org.jetbrains.exposed:exposed-java-time:0.40.1")
+    implementation("org.jetbrains.exposed:exposed-spring-boot-starter:0.41.1")
+    implementation("org.jetbrains.exposed:exposed-java-time:0.41.1")
+    implementation("org.jetbrains.exposed:exposed-jdbc:0.41.1")
 
     implementation("org.apache.maven.plugins:maven-resources-plugin:3.3.0")
 

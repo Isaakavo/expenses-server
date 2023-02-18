@@ -9,6 +9,4 @@ spring:
     driverClassName: org.postgresql.Driver
     username: postgres
     password: postgres
-  exposed:
-    generate-ddl: true
 jwkURL: https://cognito-idp.us-east-2.amazonaws.com/us-east-2_R894BlMpq/.well-known/jwks.json
