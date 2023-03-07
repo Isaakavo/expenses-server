@@ -6,7 +6,7 @@ import com.expenses.app.server.expensesappserver.common.responses.Status
 import com.expenses.app.server.expensesappserver.security.AuthenticationFacade
 import com.expenses.app.server.expensesappserver.ui.database.entities.expenses.*
 import com.expenses.app.server.expensesappserver.ui.database.entities.tags.TagEntity
-import com.expenses.app.server.expensesappserver.ui.database.entities.tags.Tags
+import com.expenses.app.server.expensesappserver.ui.database.entities.tags.TagsResponse
 import com.expenses.app.server.expensesappserver.ui.database.entities.tags.TagsTable
 import com.expenses.app.server.expensesappserver.utils.loggedTransaction
 import org.jetbrains.exposed.sql.*
@@ -96,7 +96,7 @@ class ExpenseRepository(
         return expenseToDelete
     }
 
-    fun getAllTags(): List<Tags> = loggedTransaction {
+    fun getAllTags(): List<TagsResponse> = loggedTransaction {
         tagsCrudTable.all().toList().toTags()
     }
 

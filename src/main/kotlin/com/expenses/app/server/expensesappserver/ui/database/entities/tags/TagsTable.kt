@@ -1,5 +1,6 @@
 package com.expenses.app.server.expensesappserver.ui.database.entities.tags
 
+import com.expenses.app.server.expensesappserver.utils.formatDate
 import org.jetbrains.exposed.dao.UUIDEntity
 import org.jetbrains.exposed.dao.UUIDEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
@@ -15,6 +16,12 @@ data class Tags(
     val dateAdded: LocalDateTime
 )
 
+data class TagsResponse(
+    val id: UUID? = null,
+    val tagName: String,
+    val dateAdded: String
+)
+
 object TagsTable: UUIDTable("tag", "uuid") {
     val tagName: Column<String> = varchar("tag_name", 25).uniqueIndex()
     val dateAdded: Column<LocalDateTime> = datetime("date_added")
@@ -28,9 +35,9 @@ class TagEntity(
     var tagName by TagsTable.tagName
     var dateAdded by TagsTable.dateAdded
 
-    fun toTags() = Tags(
+    fun toTags() = TagsResponse(
         id.value,
         tagName,
-        dateAdded
+        formatDate(dateAdded)
     )
 }

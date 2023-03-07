@@ -8,6 +8,9 @@ import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.util.*
 
 
 object SafeSqlLogger : SqlLogger {
@@ -22,4 +25,9 @@ object SafeSqlLogger : SqlLogger {
 fun <T> loggedTransaction(statement: Transaction.() -> T): T = transaction {
     addLogger(SafeSqlLogger)
     statement()
+}
+
+fun formatDate(time: LocalDateTime): String {
+    val format = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.getDefault())
+    return time.format(format)
 }

@@ -2,7 +2,9 @@ package com.expenses.app.server.expensesappserver.ui.database.entities.expenses
 
 import com.expenses.app.server.expensesappserver.ui.database.entities.tags.TagEntity
 import com.expenses.app.server.expensesappserver.ui.database.entities.tags.Tags
+import com.expenses.app.server.expensesappserver.ui.database.entities.tags.TagsResponse
 import com.expenses.app.server.expensesappserver.ui.database.entities.tags.TagsTable
+import com.expenses.app.server.expensesappserver.utils.formatDate
 import com.fasterxml.jackson.annotation.JsonIgnore
 import org.jetbrains.exposed.dao.IntEntity
 import org.jetbrains.exposed.dao.IntEntityClass
@@ -20,8 +22,8 @@ data class Expenses(
     val userId: String,
     val concept: String,
     val total: Double,
-    val dateAdded: LocalDateTime,
-    val tag: List<Tags>,
+    val dateAdded: String,
+    val tag: List<TagsResponse>,
     val comments: String? = null
 )
 
@@ -64,12 +66,12 @@ class ExpenseEntity(
         userId,
         concept,
         total,
-        dateAdded,
+        formatDate(dateAdded),
         tags.toList().toTags(),
         comments
     )
 }
 
-fun List<TagEntity>.toTags(): List<Tags> = this.map {
+fun List<TagEntity>.toTags(): List<TagsResponse> = this.map {
     it.toTags()
 }

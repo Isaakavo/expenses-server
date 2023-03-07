@@ -3,7 +3,7 @@ package com.expenses.app.server.expensesappserver.ui.controller.api
 import com.expenses.app.server.expensesappserver.repository.ExpenseRepository
 import com.expenses.app.server.expensesappserver.ui.database.entities.expenses.Expenses
 import com.expenses.app.server.expensesappserver.ui.database.entities.expenses.ExpensesPost
-import com.expenses.app.server.expensesappserver.ui.database.entities.tags.Tags
+import com.expenses.app.server.expensesappserver.ui.database.entities.tags.TagsResponse
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
@@ -35,5 +35,5 @@ class ExpensesController(
     fun deleteExpense(@PathVariable("id") id: Int): Expenses = expensesRepository.deleteExpense(id)
 
     @GetMapping("/tags", produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun getAllTags(): List<Tags> = expensesRepository.getAllTags()
+    fun getAllTags(): List<TagsResponse> = expensesRepository.getAllTags()
 }
